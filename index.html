@@ -294,9 +294,11 @@ const CONFIG = {
   auth: 'username',
   supabaseUrl: 'https://yfqztqnnervgjxzrqelj.supabase.co',
   supabaseAnonKey: 'sb_publishable_2hcgglV8yelyP7GNi9HOjQ_OFsGGOd8',
-  // Supabase solo acepta correos para iniciar sesión, así que el usuario se guarda
-  // por dentro como  usuario@usernameDomain. Nunca se manda nada a esa dirección.
-  usernameDomain: 'metas-ahorro.app',
+  // Supabase solo inicia sesión con correo y revisa que el dominio exista de verdad.
+  // Por eso tu usuario se guarda por dentro con TU correo + una etiqueta:
+  //   usuario "alex"  ->  tucorreo+alex@gmail.com
+  // Con "Confirm email" desactivado Supabase no manda nada; y si algún día lo hiciera, te llega a ti.
+  usernameEmail: '07.alexacosta@gmail.com',
   supabaseJs: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
 };
 const BY_USER = CONFIG.auth !== 'email';
@@ -483,7 +485,12 @@ function createLocalBackend() {
 function createSupabaseBackend(url, anonKey) {
   if (!url || !anonKey) throw new AppError('Falta la URL o la anon key de Supabase en CONFIG.');
   const sb = window.supabase.createClient(url, anonKey);
-  const toEmail = (username) => `${norm(username)}@${CONFIG.usernameDomain}`;
+  const toEmail = (username) => {
+    const base = norm(CONFIG.usernameEmail);
+    const at = base.indexOf('@');
+    if (at < 1) throw new AppError('Falta tu correo en usernameEmail dentro de CONFIG (ver LEEME.md).');
+    return `${base.slice(0, at)}+${norm(username)}@${base.slice(at + 1)}`;
+  };
   const loginEmail = (login) => BY_USER ? toEmail(login) : norm(login);
   const fail = (error) => {
     const m = String((error && error.message) || '').toLowerCase();
@@ -491,7 +498,7 @@ function createSupabaseBackend(url, anonKey) {
     if (m.includes('already registered') || m.includes('already exists')) return new AppError(BY_USER ? 'Ese usuario ya existe. Elige otro o inicia sesión.' : 'Ya existe una cuenta con este correo. Inicia sesión.');
     if (m.includes('email not confirmed')) return new AppError('Supabase pide confirmar el correo. Desactiva "Confirm email" en Authentication (ver LEEME.md).');
     if (m.includes('signup') && (m.includes('disabled') || m.includes('not allowed'))) return new AppError('El registro de cuentas nuevas está desactivado en Supabase.');
-    if (m.includes('email') && m.includes('invalid')) return new AppError(BY_USER ? 'Supabase rechazó el usuario. Cambia usernameDomain en CONFIG (ver LEEME.md).' : 'Ese correo no es válido.');
+    if (m.includes('email') && m.includes('invalid')) return new AppError(BY_USER ? 'Supabase rechazó el correo interno. Revisa usernameEmail en CONFIG (ver LEEME.md).' : 'Ese correo no es válido.');
     if (m.includes('expired') || (m.includes('invalid') && m.includes('token'))) return new AppError('El código no es válido o ya expiró. Pide uno nuevo.');
     if (m.includes('rate limit') || (error && error.status === 429)) return new AppError('Demasiados intentos. Espera un momento y vuelve a intentarlo.');
     if (m.includes('password') && m.includes('characters')) return new AppError('La contraseña es muy corta.');
@@ -501,7 +508,8 @@ function createSupabaseBackend(url, anonKey) {
   const sess = (user) => {
     const meta = user.user_metadata || {};
     const email = String(user.email || '');
-    return { userId: user.id, name: BY_USER ? (meta.username || email.split('@')[0]) : email };
+    const local = email.split('@')[0];
+    return { userId: user.id, name: BY_USER ? (meta.username || local.slice(local.lastIndexOf('+') + 1)) : email };
   };
 
   return {
