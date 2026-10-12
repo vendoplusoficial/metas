@@ -1,0 +1,1722 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Metas de Ahorro</title>
+<meta name="theme-color" content="#09090a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  /* Layout: una sola columna tipo iPhone. Pantallas apiladas con navegación lateral y hojas que suben desde abajo. */
+  --bg:#09090a;
+  --surface:#141416;
+  --surface-2:#1c1c1f;
+  --surface-3:#2a2a2e;
+  --line:#232326;
+  --line-2:#323237;
+  --text:#f4f4f6;
+  --text-2:#c7c7cc;
+  --muted:#8b8b91;
+  --faint:#5a5a60;
+  --ink:#0b0b0c;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Geist",system-ui,"Segoe UI",Roboto,sans-serif;
+  --font-display:-apple-system,BlinkMacSystemFont,"SF Pro Display","Geist",system-ui,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"SF Mono",ui-monospace,"Geist Mono",Menlo,Consolas,monospace;
+  --r-card:10px;
+  --r-ctrl:9px;
+  --r-sheet:14px;
+  --ease:cubic-bezier(.32,.72,0,1);
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --nav-h:52px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font:15px/1.4 var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+input{font:inherit;color:inherit;margin:0}
+h1,h2,p{margin:0}
+:focus{outline:none}
+:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* Contenedor de la app */
+.app{position:fixed;inset:0;margin:0 auto;max-width:480px;overflow:hidden;background:#000}
+@media (min-width:520px){.app{border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+.stack{position:absolute;inset:0;overflow:hidden;background:var(--bg);transform-origin:50% 0;transition:transform .5s var(--ease),border-radius .5s var(--ease)}
+.app.sheet-open .stack{transform:translateY(calc(env(safe-area-inset-top,0px) + 10px)) scale(.94);border-radius:12px}
+
+/* Pantallas */
+.screen{position:absolute;inset:0;background:var(--bg);transform:translate3d(100%,0,0);transition:transform .5s var(--ease),opacity .4s var(--ease-out);will-change:transform;box-shadow:-12px 0 32px rgba(0,0,0,.45);touch-action:pan-y}
+.screen::after{content:"";position:absolute;inset:0;background:#000;opacity:var(--dim,0);pointer-events:none;transition:opacity .5s var(--ease);z-index:5}
+.screen.active{transform:none}
+.screen.behind{transform:translate3d(-30%,0,0);--dim:.45;pointer-events:none}
+.screen.entering{opacity:0;transform:scale(.985);transition:none}
+.screen.leaving{opacity:0;pointer-events:none}
+.screen.dragging,.screen.dragging::after{transition:none}
+
+.nav{position:absolute;top:0;left:0;right:0;z-index:3;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:env(safe-area-inset-top,0px) 10px 0;height:calc(env(safe-area-inset-top,0px) + var(--nav-h));background:rgba(9,9,10,.8);-webkit-backdrop-filter:saturate(1.6) blur(20px);backdrop-filter:saturate(1.6) blur(20px);border-bottom:1px solid transparent;transition:border-color .25s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav-left{justify-self:start;min-width:0}
+.nav-right{justify-self:end;min-width:0}
+.nav-title{font:600 17px/1.2 var(--font);max-width:52vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transform:translateY(5px);transition:opacity .25s,transform .35s var(--ease-out)}
+.nav.scrolled .nav-title{opacity:1;transform:none}
+.nav-btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 8px;border-radius:8px;font-size:17px;color:var(--text);transition:opacity .15s}
+.nav-btn:active{opacity:.45}
+.avatar{width:34px;height:34px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line-2);font:600 14px var(--font);display:grid;place-items:center;margin-right:6px;transition:transform .2s var(--ease-out),background .2s}
+.avatar:active{transform:scale(.92)}
+
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding:calc(env(safe-area-inset-top,0px) + var(--nav-h)) 20px calc(env(safe-area-inset-bottom,0px) + 48px)}
+.large{font:700 34px/1.12 var(--font-display);letter-spacing:-.022em;margin-top:6px;text-wrap:balance;overflow-wrap:anywhere}
+.muted-p{color:var(--muted);font-size:16px;line-height:1.45;margin-top:8px;max-width:34ch}
+.eyebrow{font:600 12px/1 var(--font);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.section{margin-top:34px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 12px;min-height:22px}
+.count{font:500 13px var(--font-mono);color:var(--faint)}
+.link{font-size:15px;font-weight:500;color:var(--text);padding:4px 0;transition:opacity .15s}
+.link:active{opacity:.45}
+
+/* Botones */
+.btn{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;padding:0 18px;border-radius:var(--r-ctrl);font:600 16px/1 var(--font);letter-spacing:-.005em;transition:transform .22s var(--ease-out),background-color .2s,color .2s,border-color .2s,opacity .2s}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn-primary{background:var(--text);color:var(--ink)}
+.btn-secondary{background:var(--surface-2);color:var(--text);border:1px solid var(--line-2)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line-2)}
+.btn.armed{background:var(--text);color:var(--ink);border-color:var(--text)}
+.btn-sm{height:42px;font-size:15px}
+@media (hover:hover){
+  .btn-primary:hover:not(:disabled){background:#fff}
+  .btn-secondary:hover:not(:disabled),.btn-ghost:hover:not(:disabled){background:var(--surface-3)}
+  .goal:hover{background:var(--surface-2)}
+  button.row:hover{background:var(--surface-2)}
+  .avatar:hover{background:var(--surface-3)}
+}
+.spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Campos */
+.form{display:grid;gap:16px}
+.field{display:grid;gap:8px;min-width:0}
+.field>label{font:500 13px/1 var(--font);color:var(--muted);padding-left:2px}
+.input{width:100%;height:52px;padding:0 14px;background:var(--surface-2);border:1px solid var(--line-2);border-radius:var(--r-ctrl);font-size:17px;-webkit-appearance:none;appearance:none;transition:border-color .2s,box-shadow .2s,background-color .2s}
+.input::placeholder{color:var(--faint)}
+.input:focus{border-color:#77777d;box-shadow:0 0 0 4px rgba(255,255,255,.06);background:#202023}
+.input-wrap{position:relative;min-width:0}
+.input-wrap .prefix,.input-wrap .suffix{position:absolute;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:17px}
+.input-wrap .prefix{left:14px}
+.input-wrap .suffix{right:14px}
+.input.has-prefix{padding-left:30px}
+.input.has-suffix{padding-right:34px}
+.input.has-unit{padding-right:62px}
+.input-amount{height:66px;font:600 30px/1 var(--font-display);letter-spacing:-.02em}
+.input-amount+.unit,.unit{font:500 13px var(--font-mono)!important;letter-spacing:.04em}
+.input-wrap .prefix.big{font:600 30px/1 var(--font-display);color:var(--muted);left:14px}
+.input.input-amount.has-prefix{padding-left:36px}
+.reveal{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:38px;padding:0 10px;border-radius:7px;font-size:14px;font-weight:500;color:var(--text-2)}
+.reveal:active{opacity:.5}
+.input.has-reveal{padding-right:90px}
+.hint{font-size:13px;color:var(--muted);line-height:1.45;padding-left:2px}
+.err{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line-2);border-left:3px solid var(--text);border-radius:8px;background:var(--surface-2);font-size:14px;line-height:1.4;color:var(--text)}
+.err svg{flex:none;margin-top:1px}
+
+/* Código de verificación */
+.code{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.code input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;color:transparent;caret-color:transparent;z-index:1;border:0;background:none;cursor:text}
+.cell{height:60px;border-radius:var(--r-ctrl);background:var(--surface-2);border:1px solid var(--line-2);display:grid;place-items:center;font:600 24px var(--font-mono);transition:border-color .2s,background-color .2s,transform .25s var(--ease-out)}
+.cell.filled{background:#202023}
+.cell.active{border-color:#8a8a90;box-shadow:0 0 0 4px rgba(255,255,255,.06)}
+.cell.active:empty::after{content:"";width:2px;height:26px;background:var(--text);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.notice{display:grid;gap:10px;padding:14px;border:1px dashed var(--line-2);border-radius:var(--r-card);font-size:14px;color:var(--text-2);line-height:1.45}
+.notice b{font:600 18px var(--font-mono);letter-spacing:.18em;color:var(--text)}
+.notice-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.text-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.text-actions .link{font-size:14px}
+.text-actions .link:disabled{color:var(--faint);cursor:default}
+
+/* Bienvenida y acceso */
+.auth .scroll{display:flex;flex-direction:column;padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
+.welcome{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding-block:48px 32px}
+.logo .track{stroke:var(--surface-3)}
+.logo .arc{stroke:var(--text)}
+.wordmark{font:700 46px/1 var(--font-display);letter-spacing:-.045em}
+.lede{color:var(--muted);font-size:17px;line-height:1.45;max-width:30ch}
+.auth-actions{display:grid;gap:10px}
+.fine{color:var(--faint);font-size:13px;text-align:center;margin-top:6px}
+.step-head{margin:6px 0 28px}
+.step-head .eyebrow{display:block;margin-bottom:12px}
+.steps{position:relative}
+.switch{margin-top:28px;text-align:center;color:var(--muted);font-size:15px}
+
+/* Inicio */
+.summary{display:grid;gap:6px;margin-top:22px}
+.summary-amount{font:700 42px/1.05 var(--font-display);letter-spacing:-.035em}
+.summary-sub{color:var(--muted);font-size:15px}
+.create-btn{margin-top:24px}
+.list{display:grid;gap:10px}
+.goal{display:grid;gap:14px;width:100%;text-align:left;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);transition:transform .25s var(--ease-out),background-color .2s}
+.goal:active{transform:scale(.98);background:var(--surface-2)}
+.goal-top{display:flex;align-items:center;gap:10px}
+.goal-name{flex:1;min-width:0;font:600 17px/1.3 var(--font);overflow-wrap:anywhere}
+.chev{color:var(--faint);flex:none;display:flex}
+.goal-figs{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.goal-figs>div{min-width:0}
+.goal-saved{font:600 22px/1 var(--font-display);letter-spacing:-.02em}
+.goal-of{color:var(--muted);font-size:14px;margin-left:4px}
+.goal-pct{font:500 13px var(--font-mono);color:var(--text-2);flex:none}
+.bar{height:4px;background:var(--surface-3);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--text);border-radius:inherit;transition:width .9s var(--ease)}
+.pill{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:6px;font:600 12px/1 var(--font);letter-spacing:.02em;flex:none;background:var(--text);color:var(--ink)}
+.empty{display:grid;gap:16px;padding:20px 18px;border:1px dashed var(--line-2);border-radius:var(--r-card);color:var(--muted);font-size:15px;line-height:1.45}
+.empty strong{display:block;color:var(--text);font-weight:600;margin-bottom:4px;font-size:16px}
+
+/* Detalle de meta */
+.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.title-row .pill{margin-top:14px}
+.hero{margin-top:26px}
+.hero-amount{font:700 50px/1 var(--font-display);letter-spacing:-.04em;margin-top:12px;overflow-wrap:anywhere}
+.hero-of{color:var(--muted);margin-top:8px;font-size:16px}
+.bar-lg{height:6px;border-radius:3px;margin-top:22px}
+.hero-meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;color:var(--muted);font-size:14px}
+.hero-meta span:first-child{color:var(--text-2)}
+.actions-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:26px}
+.actions-2 .btn{padding:0 10px;font-size:15px}
+.group{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden}
+.row{position:relative;display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:12px 16px;text-align:left;transition:background-color .15s}
+.row+.row::before{content:"";position:absolute;top:0;left:16px;right:0;height:1px;background:var(--line)}
+button.row:active{background:var(--surface-2)}
+.row-main{flex:1;min-width:0}
+.row-title{font-size:16px;line-height:1.3;overflow-wrap:anywhere}
+.row-sub{color:var(--muted);font-size:13px;margin-top:3px}
+.row-right{text-align:right;flex:none}
+.row-val{font:600 16px var(--font);white-space:nowrap}
+.row-val.neg{color:var(--muted);font-weight:500}
+.row-k{color:var(--muted);font-size:15px;flex:none}
+.row-v{font-size:15px;text-align:right;min-width:0;overflow-wrap:anywhere;flex:1}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;flex:none}
+.sw-empty{background:none;border:1px dashed var(--faint)}
+.split{display:flex;gap:2px;height:10px;border-radius:3px;overflow:hidden;background:var(--surface-3);margin-bottom:12px;transform-origin:0 50%}
+.split i{display:block;height:100%;flex:0 0 0%;transition:flex-basis .5s var(--ease)}
+.split-lg{height:12px;margin:0}
+.rest .row-title,.rest .row-val{color:var(--muted)}
+.skeleton{height:58px;border-radius:var(--r-card);background:var(--surface);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.5}}
+.detail-amount{font:700 40px/1 var(--font-display);letter-spacing:-.035em;padding:6px 0 4px}
+
+/* Dividir meta */
+.alloc-list{display:grid}
+.alloc-item{display:grid;gap:8px;padding-bottom:14px}
+.alloc-row{display:grid;grid-template-columns:minmax(0,1fr) 92px 44px;gap:8px;align-items:center}
+.alloc-calc{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);padding-left:2px}
+.alloc-total{display:flex;justify-content:space-between;gap:12px;padding:14px 2px 0;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.alloc-total strong{color:var(--text);font-weight:600}
+.alloc-total.over strong{text-decoration:underline;text-underline-offset:3px}
+.icon-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;background:var(--surface-2);color:var(--text-2);flex:none;transition:transform .2s var(--ease-out),background-color .2s}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn-lg{width:44px;height:52px;border:1px solid var(--line-2)}
+
+/* Hoja inferior */
+.sheet-layer{position:absolute;inset:0;z-index:20;visibility:hidden;pointer-events:none;transition:visibility 0s linear .5s}
+.sheet-layer.open{visibility:visible;pointer-events:auto;transition-delay:0s}
+.backdrop{position:absolute;inset:0;background:rgba(0,0,0,.55);opacity:0;transition:opacity .45s var(--ease)}
+.sheet-layer.open .backdrop{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:var(--kb,0px);max-height:calc(100% - env(safe-area-inset-top,0px) - 24px);display:flex;flex-direction:column;background:var(--surface);border-top:1px solid var(--line-2);border-radius:var(--r-sheet) var(--r-sheet) 0 0;transform:translate3d(0,105%,0);transition:transform .5s var(--ease),bottom .25s var(--ease-out);padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
+.sheet-layer.open .sheet{transform:none}
+.sheet.dragging{transition:none}
+.sheet-grab{flex:none;touch-action:none;cursor:grab}
+.grabber{width:38px;height:5px;border-radius:3px;background:var(--surface-3);margin:8px auto 0}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 20px 8px}
+.sheet-head h2{font:700 21px/1.2 var(--font-display);letter-spacing:-.015em;min-width:0;overflow-wrap:anywhere}
+.sheet-body{overflow-y:auto;overscroll-behavior:contain;padding:12px 20px 24px}
+.sheet-text{color:var(--muted);font-size:14px;line-height:1.5}
+.sheet-text b{color:var(--text-2);font-weight:600}
+
+/* Control segmentado */
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;height:38px;padding:2px;background:var(--bg);border:1px solid var(--line);border-radius:9px}
+.seg-thumb{position:absolute;top:2px;bottom:2px;left:2px;width:calc(50% - 2px);border-radius:7px;background:var(--surface-3);box-shadow:0 1px 3px rgba(0,0,0,.4);transition:transform .38s var(--ease)}
+.seg[data-v="expense"] .seg-thumb{transform:translateX(100%)}
+.seg button{position:relative;z-index:1;font:600 14px var(--font);color:var(--muted);transition:color .25s}
+.seg button[aria-selected="true"]{color:var(--text)}
+
+/* Aviso flotante */
+.toast{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:40;max-width:calc(100% - 32px);padding:11px 16px;border-radius:10px;background:var(--text);color:var(--ink);font:600 14px/1.3 var(--font);box-shadow:0 10px 30px rgba(0,0,0,.5);transform:translate(-50%,160%);opacity:0;transition:transform .5s var(--ease),opacity .3s;pointer-events:none;text-align:center}
+.toast.show{transform:translate(-50%,0);opacity:1}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+
+</head>
+<body>
+<div class="app" id="app">
+  <div class="stack" id="stack"></div>
+  <div class="sheet-layer" id="sheet">
+    <div class="backdrop" data-sheet-close></div>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+      <div class="sheet-grab">
+        <div class="grabber"></div>
+        <div class="sheet-head">
+          <h2 id="sheet-title"></h2>
+          <button class="icon-btn" type="button" data-sheet-close aria-label="Cerrar">
+            <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 2 8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="sheet-body" id="sheet-body"></div>
+    </div>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+/* ==========================================================================
+   CONFIGURACIÓN
+   backend: 'local'    -> todo se guarda en este navegador
+   backend: 'supabase' -> usa tu proyecto de Supabase (llena URL y anon key)
+
+   auth: 'username' -> usuario + contraseña. No se envía ningún correo.
+   auth: 'email'    -> correo + código de 6 dígitos + contraseña
+                       (déjalo para cuando la publiques en Play Store; ver LEEME.md)
+   ========================================================================== */
+const CONFIG = {
+  backend: 'local',
+  auth: 'username',
+  supabaseUrl: '',      // https://TU-PROYECTO.supabase.co
+  supabaseAnonKey: '',  // Project Settings > API Keys > anon public (o publishable)
+  // Supabase solo acepta correos para iniciar sesión, así que el usuario se guarda
+  // por dentro como  usuario@usernameDomain. Nunca se manda nada a esa dirección.
+  usernameDomain: 'metas-ahorro.app',
+  supabaseJs: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
+};
+const BY_USER = CONFIG.auth !== 'email';
+const BAD_LOGIN = BY_USER ? 'Usuario o contraseña incorrectos.' : 'Correo o contraseña incorrectos.';
+
+/* ==========================================================================
+   UTILIDADES
+   ========================================================================== */
+class AppError extends Error {}
+const norm = (e) => String(e || '').trim().toLowerCase();
+const r2 = (n) => Math.round(Number(n) * 100) / 100;
+const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
+  : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+async function sha256(text) {
+  if (!(window.crypto && crypto.subtle)) throw new AppError('Este navegador no permite cifrar la contraseña. Abre la app desde https.');
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+const sumMovements = (list) => r2(list.reduce((s, m) => s + (m.type === 'income' ? 1 : -1) * Number(m.amount), 0));
+const msgOf = (e) => (e instanceof AppError) ? e.message : 'Algo salió mal. Inténtalo de nuevo.';
+
+/* ==========================================================================
+   DATOS: MODO LOCAL (navegador)
+   Misma forma que las tablas de Supabase: goals, movements, allocations.
+   ========================================================================== */
+function createLocalBackend() {
+  const KEY = 'metas-ahorro.v1';
+  let persistent = true;
+  let db = null;
+  try {
+    const raw = localStorage.getItem(KEY);
+    db = raw ? JSON.parse(raw) : null;
+    localStorage.setItem(KEY + '.probe', '1');
+    localStorage.removeItem(KEY + '.probe');
+  } catch (e) { persistent = false; }
+  if (!db || typeof db !== 'object') db = {};
+  db = Object.assign({ users: {}, session: null, pending: null, goals: [], movements: [], allocations: [] }, db);
+
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { persistent = false; } };
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const now = () => new Date().toISOString();
+  const me = () => { if (!db.session) throw new AppError('Tu sesión terminó. Inicia sesión de nuevo.'); return db.session.userId; };
+  const own = (list, id, uid) => {
+    const x = list.find((r) => r.id === id && r.user_id === uid);
+    if (!x) throw new AppError('No encontramos ese registro.');
+    return x;
+  };
+
+  return {
+    kind: 'local',
+    get persistent() { return persistent; },
+    auth: {
+      async getSession() {
+        const s = db.session;
+        return s ? { userId: s.userId, name: s.name || s.email } : null;
+      },
+      // Modo usuario: crea la cuenta y entra de una vez.
+      async signUp(username, password) {
+        await wait(400);
+        const u = norm(username);
+        if (db.users[u]) throw new AppError('Ese usuario ya existe. Elige otro o inicia sesión.');
+        const salt = uuid();
+        const user = { id: uuid(), email: u, salt, hash: await sha256(salt + password), created_at: now() };
+        db.users[u] = user;
+        db.session = { userId: user.id, name: u };
+        save();
+        return { ...db.session };
+      },
+      // Modo correo: código -> verificación -> contraseña.
+      async sendSignupCode(email) {
+        await wait(450);
+        email = norm(email);
+        if (db.users[email]) throw new AppError('Ya existe una cuenta con este correo. Inicia sesión.');
+        const code = String(Math.floor(Math.random() * 1e6)).padStart(6, '0');
+        db.pending = { email, code, expires: Date.now() + 10 * 60 * 1000, verified: false };
+        save();
+        return { devCode: code }; // En Supabase el código llega por correo y esto no existe.
+      },
+      async verifyCode(email, code) {
+        await wait(350);
+        const p = db.pending;
+        if (!p || p.email !== norm(email)) throw new AppError('Pide un código nuevo para este correo.');
+        if (Date.now() > p.expires) throw new AppError('El código expiró. Pide uno nuevo.');
+        if (String(code) !== p.code) throw new AppError('El código no coincide. Revísalo e inténtalo otra vez.');
+        p.verified = true;
+        save();
+      },
+      async setPassword(email, password) {
+        await wait(300);
+        const p = db.pending;
+        if (!p || !p.verified || p.email !== norm(email)) throw new AppError('Confirma tu correo antes de crear la contraseña.');
+        const salt = uuid();
+        const user = { id: uuid(), email: p.email, salt, hash: await sha256(salt + password), created_at: now() };
+        db.users[p.email] = user;
+        db.pending = null;
+        db.session = { userId: user.id, name: user.email };
+        save();
+        return { ...db.session };
+      },
+      async signIn(login, password) {
+        await wait(450);
+        const u = db.users[norm(login)];
+        if (!u || u.hash !== await sha256(u.salt + password)) throw new AppError(BAD_LOGIN);
+        db.session = { userId: u.id, name: u.email };
+        save();
+        return { ...db.session };
+      },
+      async signOut() { db.session = null; save(); },
+    },
+    goals: {
+      async list() {
+        const uid = me();
+        return db.goals.filter((g) => g.user_id === uid)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at))
+          .map((g) => ({ id: g.id, name: g.name, target: g.target, created_at: g.created_at,
+            saved: sumMovements(db.movements.filter((m) => m.goal_id === g.id)) }));
+      },
+      async create({ name, target }) {
+        const g = { id: uuid(), user_id: me(), name: name.trim(), target: r2(target), created_at: now() };
+        db.goals.push(g); save();
+        return { id: g.id, name: g.name, target: g.target, created_at: g.created_at, saved: 0 };
+      },
+      async update(id, patch) {
+        const g = own(db.goals, id, me());
+        if (patch.name != null) g.name = patch.name.trim();
+        if (patch.target != null) g.target = r2(patch.target);
+        save();
+      },
+      async remove(id) {
+        own(db.goals, id, me());
+        db.goals = db.goals.filter((g) => g.id !== id);
+        db.movements = db.movements.filter((m) => m.goal_id !== id);
+        db.allocations = db.allocations.filter((a) => a.goal_id !== id);
+        save();
+      },
+    },
+    movements: {
+      async list(goalId) {
+        const uid = me();
+        return db.movements.filter((m) => m.goal_id === goalId && m.user_id === uid)
+          .sort((a, b) => b.created_at.localeCompare(a.created_at)).map((m) => ({ ...m }));
+      },
+      async create(goalId, { type, amount, concept }) {
+        const uid = me();
+        own(db.goals, goalId, uid);
+        const m = { id: uuid(), goal_id: goalId, user_id: uid, type, amount: r2(amount), concept: (concept || '').trim(), created_at: now() };
+        db.movements.push(m); save();
+        return { ...m };
+      },
+      async remove(id) {
+        own(db.movements, id, me());
+        db.movements = db.movements.filter((m) => m.id !== id);
+        save();
+      },
+    },
+    allocations: {
+      async list(goalId) {
+        const uid = me();
+        return db.allocations.filter((a) => a.goal_id === goalId && a.user_id === uid)
+          .sort((a, b) => a.position - b.position).map((a) => ({ ...a }));
+      },
+      async replace(goalId, items) {
+        const uid = me();
+        own(db.goals, goalId, uid);
+        const total = items.reduce((s, i) => s + Number(i.percent), 0);
+        if (total > 100.0001) throw new AppError('La suma de porcentajes no puede pasar de 100%.');
+        db.allocations = db.allocations.filter((a) => a.goal_id !== goalId);
+        items.forEach((it, i) => db.allocations.push({ id: uuid(), goal_id: goalId, user_id: uid,
+          label: it.label.trim(), percent: r2(it.percent), position: i, created_at: now() }));
+        save();
+        return this.list(goalId);
+      },
+    },
+  };
+}
+
+/* ==========================================================================
+   DATOS: SUPABASE (listo para usar; ver LEEME.md y schema.sql)
+   Modo usuario: signUp({ email: usuario@dominio, password }) -> entra directo
+                 (requiere "Confirm email" desactivado en Supabase)
+   Modo correo:  signInWithOtp -> verifyOtp (código de 6 dígitos) -> updateUser({password})
+   Acceso:       signInWithPassword
+   ========================================================================== */
+function createSupabaseBackend(url, anonKey) {
+  if (!url || !anonKey) throw new AppError('Falta la URL o la anon key de Supabase en CONFIG.');
+  const sb = window.supabase.createClient(url, anonKey);
+  const toEmail = (username) => `${norm(username)}@${CONFIG.usernameDomain}`;
+  const loginEmail = (login) => BY_USER ? toEmail(login) : norm(login);
+  const fail = (error) => {
+    const m = String((error && error.message) || '').toLowerCase();
+    if (m.includes('invalid login')) return new AppError(BAD_LOGIN);
+    if (m.includes('already registered') || m.includes('already exists')) return new AppError(BY_USER ? 'Ese usuario ya existe. Elige otro o inicia sesión.' : 'Ya existe una cuenta con este correo. Inicia sesión.');
+    if (m.includes('email not confirmed')) return new AppError('Supabase pide confirmar el correo. Desactiva "Confirm email" en Authentication (ver LEEME.md).');
+    if (m.includes('signup') && (m.includes('disabled') || m.includes('not allowed'))) return new AppError('El registro de cuentas nuevas está desactivado en Supabase.');
+    if (m.includes('email') && m.includes('invalid')) return new AppError(BY_USER ? 'Supabase rechazó el usuario. Cambia usernameDomain en CONFIG (ver LEEME.md).' : 'Ese correo no es válido.');
+    if (m.includes('expired') || (m.includes('invalid') && m.includes('token'))) return new AppError('El código no es válido o ya expiró. Pide uno nuevo.');
+    if (m.includes('rate limit') || (error && error.status === 429)) return new AppError('Demasiados intentos. Espera un momento y vuelve a intentarlo.');
+    if (m.includes('password') && m.includes('characters')) return new AppError('La contraseña es muy corta.');
+    if (m.includes('failed to fetch') || m.includes('network')) return new AppError('Sin conexión. Revisa tu internet.');
+    return new AppError((error && error.message) || 'Algo salió mal.');
+  };
+  const sess = (user) => {
+    const meta = user.user_metadata || {};
+    const email = String(user.email || '');
+    return { userId: user.id, name: BY_USER ? (meta.username || email.split('@')[0]) : email };
+  };
+
+  return {
+    kind: 'supabase',
+    persistent: true,
+    auth: {
+      async getSession() {
+        const { data } = await sb.auth.getSession();
+        return data.session ? sess(data.session.user) : null;
+      },
+      async signUp(username, password) {
+        const { data, error } = await sb.auth.signUp({
+          email: toEmail(username),
+          password,
+          options: { data: { username: norm(username) } },
+        });
+        if (error) throw fail(error);
+        if (!data.session) throw new AppError('Supabase no inició la sesión: desactiva "Confirm email" en Authentication > Sign In / Providers > Email (ver LEEME.md).');
+        return sess(data.user);
+      },
+      async sendSignupCode(email) {
+        const { error } = await sb.auth.signInWithOtp({ email: norm(email), options: { shouldCreateUser: true } });
+        if (error) throw fail(error);
+        return {};
+      },
+      async verifyCode(email, code) {
+        const { error } = await sb.auth.verifyOtp({ email: norm(email), token: String(code), type: 'email' });
+        if (error) throw fail(error);
+      },
+      async setPassword(_email, password) {
+        const { data, error } = await sb.auth.updateUser({ password });
+        if (error) throw fail(error);
+        return sess(data.user);
+      },
+      async signIn(login, password) {
+        const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail(login), password });
+        if (error) throw fail(error);
+        return sess(data.user);
+      },
+      async signOut() { await sb.auth.signOut(); },
+    },
+    goals: {
+      async list() {
+        const { data, error } = await sb.from('goals')
+          .select('id,name,target,created_at,movements(type,amount)')
+          .order('created_at', { ascending: false });
+        if (error) throw fail(error);
+        return data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), created_at: g.created_at, saved: sumMovements(g.movements || []) }));
+      },
+      async create({ name, target }) {
+        const { data, error } = await sb.from('goals').insert({ name: name.trim(), target: r2(target) })
+          .select('id,name,target,created_at').single();
+        if (error) throw fail(error);
+        return { ...data, target: Number(data.target), saved: 0 };
+      },
+      async update(id, patch) {
+        const row = {};
+        if (patch.name != null) row.name = patch.name.trim();
+        if (patch.target != null) row.target = r2(patch.target);
+        const { error } = await sb.from('goals').update(row).eq('id', id);
+        if (error) throw fail(error);
+      },
+      async remove(id) {
+        const { error } = await sb.from('goals').delete().eq('id', id);
+        if (error) throw fail(error);
+      },
+    },
+    movements: {
+      async list(goalId) {
+        const { data, error } = await sb.from('movements').select('id,goal_id,type,amount,concept,created_at')
+          .eq('goal_id', goalId).order('created_at', { ascending: false });
+        if (error) throw fail(error);
+        return data.map((m) => ({ ...m, amount: Number(m.amount) }));
+      },
+      async create(goalId, { type, amount, concept }) {
+        const { data, error } = await sb.from('movements')
+          .insert({ goal_id: goalId, type, amount: r2(amount), concept: (concept || '').trim() })
+          .select('id,goal_id,type,amount,concept,created_at').single();
+        if (error) throw fail(error);
+        return { ...data, amount: Number(data.amount) };
+      },
+      async remove(id) {
+        const { error } = await sb.from('movements').delete().eq('id', id);
+        if (error) throw fail(error);
+      },
+    },
+    allocations: {
+      async list(goalId) {
+        const { data, error } = await sb.from('allocations').select('id,goal_id,label,percent,position')
+          .eq('goal_id', goalId).order('position');
+        if (error) throw fail(error);
+        return data.map((a) => ({ ...a, percent: Number(a.percent) }));
+      },
+      async replace(goalId, items) {
+        const payload = items.map((it, i) => ({ label: it.label.trim(), percent: r2(it.percent), position: i }));
+        const { error } = await sb.rpc('replace_allocations', { p_goal_id: goalId, p_items: payload });
+        if (error) throw fail(error);
+        return this.list(goalId);
+      },
+    },
+  };
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve;
+    s.onerror = () => reject(new AppError('No se pudo cargar Supabase. Revisa tu conexión.'));
+    document.head.appendChild(s);
+  });
+}
+
+/* ==========================================================================
+   FORMATO
+   ========================================================================== */
+const fmt0 = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
+const fmt2 = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function money(n) {
+  const v = r2(Number(n) || 0);
+  return (Number.isInteger(v) ? fmt0 : fmt2).format(v).replace('-', '−');
+}
+const plain = (n) => Number(n).toLocaleString('en-US', { maximumFractionDigits: 2 });
+const fmtPct = (p) => (Math.round(p * 10) / 10).toString() + '%';
+const progress = (g) => g.target > 0 ? Math.max(0, Math.min(100, (g.saved / g.target) * 100)) : 0;
+const pctLabel = (g) => g.target > 0 ? Math.max(0, Math.floor((g.saved / g.target) * 100)) + '%' : '0%';
+const dShort = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' });
+const dYear = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+const tFmt = new Intl.DateTimeFormat('es-MX', { hour: 'numeric', minute: '2-digit' });
+const dLong = new Intl.DateTimeFormat('es-MX', { dateStyle: 'long', timeStyle: 'short' });
+function when(iso) {
+  const d = new Date(iso), n = new Date();
+  if (d.toDateString() === n.toDateString()) return 'Hoy, ' + tFmt.format(d);
+  const y = new Date(n); y.setDate(n.getDate() - 1);
+  if (d.toDateString() === y.toDateString()) return 'Ayer, ' + tFmt.format(d);
+  return (d.getFullYear() === n.getFullYear() ? dShort : dYear).format(d).replace('.', '');
+}
+const SHADES = ['#f4f4f6', '#a3a3a9', '#66666c', '#d2d2d7', '#84848a', '#4a4a50', '#bcbcc1', '#5a5a60'];
+const shade = (i) => SHADES[i % SHADES.length];
+
+/* ==========================================================================
+   DOM Y MOVIMIENTO
+   ========================================================================== */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(html) { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FINE = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const EASE = 'cubic-bezier(.32,.72,0,1)';
+function anim(el, frames, opts = {}) {
+  if (REDUCE || !el || !el.animate) return null;
+  return el.animate(frames, Object.assign({ duration: 420, easing: EASE, fill: 'backwards' }, opts));
+}
+function countTo(el, to, duration = 750) {
+  const from = typeof el._v === 'number' ? el._v : 0;
+  el._v = to;
+  cancelAnimationFrame(el._raf);
+  if (REDUCE || from === to) { el.textContent = money(to); return; }
+  const t0 = performance.now();
+  const step = (t) => {
+    const p = Math.min(1, (t - t0) / duration);
+    const e = 1 - Math.pow(1 - p, 4);
+    el.textContent = p < 1 ? money(Math.round(from + (to - from) * e)) : money(to);
+    if (p < 1) el._raf = requestAnimationFrame(step);
+  };
+  el._raf = requestAnimationFrame(step);
+}
+function shake(el) { anim(el, [{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(2px)' }, { transform: 'translateX(0)' }], { duration: 380, easing: 'ease-out', fill: 'none' }); }
+
+const ICON = {
+  back: '<svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  chev: '<svg width="8" height="14" viewBox="0 0 8 14" aria-hidden="true"><path d="m1.5 1.5 5 5.5-5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  plus: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  minus: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  close: '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 2 8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+  alert: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5v4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.4" r=".9" fill="currentColor"/></svg>',
+};
+const LOGO = '<svg class="logo" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle class="track" cx="28" cy="28" r="23" fill="none" stroke-width="6"/><circle class="arc" cx="28" cy="28" r="23" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="43" transform="rotate(-90 28 28)"/></svg>';
+
+const app = $('#app');
+const stackEl = $('#stack');
+const toastEl = $('#toast');
+let api = null;
+const state = { session: null, goals: [] };
+async function loadGoals() { state.goals = await api.goals.list(); }
+
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+function showErr(form, msg) {
+  const e = form.querySelector('.err');
+  if (!e) return toast(msg);
+  e.innerHTML = ICON.alert + '<span>' + esc(msg) + '</span>';
+  const wasHidden = e.hidden;
+  e.hidden = false;
+  if (wasHidden) anim(e, [{ opacity: 0, transform: 'translateY(-4px)' }, { opacity: 1, transform: 'none' }], { duration: 280 });
+  else shake(e);
+}
+function clearErr(form) { const e = form.querySelector('.err'); if (e) e.hidden = true; }
+function setLoading(btn, on) {
+  if (on) { btn.dataset.html = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spin" aria-label="Cargando"></span>'; }
+  else { btn.disabled = false; if (btn.dataset.html) btn.innerHTML = btn.dataset.html; }
+}
+function twoTap(btn, confirmLabel, action) {
+  let armed = false, t;
+  const orig = btn.innerHTML;
+  btn.addEventListener('click', async () => {
+    if (!armed) {
+      armed = true;
+      btn.textContent = confirmLabel;
+      btn.classList.add('armed');
+      t = setTimeout(() => { armed = false; btn.innerHTML = orig; btn.classList.remove('armed'); }, 4000);
+      return;
+    }
+    clearTimeout(t);
+    await action(btn);
+  });
+}
+
+/* Campos de dinero y porcentaje */
+function moneyField(id) {
+  return `<div class="input-wrap"><span class="prefix big">$</span><input class="input input-amount has-prefix has-unit num" id="${id}" inputmode="decimal" autocomplete="off" placeholder="0"><span class="suffix unit">MXN</span></div>`;
+}
+function bindMoney(input) {
+  input.addEventListener('input', () => {
+    let v = input.value.replace(/[^\d.]/g, '');
+    const i = v.indexOf('.');
+    if (i > -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 2);
+    let [a, b] = v.split('.');
+    a = a.replace(/^0+(?=\d)/, '').slice(0, 11);
+    const g = a.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    input.value = b !== undefined ? (g || '0') + '.' + b : g;
+  });
+}
+const readMoney = (input) => { const n = parseFloat(input.value.replace(/,/g, '')); return isFinite(n) ? r2(n) : 0; };
+function cleanPct(v) {
+  v = v.replace(/[^\d.]/g, '');
+  const i = v.indexOf('.');
+  if (i > -1) v = v.slice(0, i + 1) + v.slice(i + 1).replace(/\./g, '').slice(0, 1);
+  v = v.replace(/^0+(?=\d)/, '');
+  if (parseFloat(v) > 100) v = '100';
+  return v;
+}
+
+/* ==========================================================================
+   NAVEGACIÓN (pila de pantallas tipo iOS + gesto desde el borde)
+   ========================================================================== */
+const nav = {
+  stack: [],
+  get top() { return this.stack[this.stack.length - 1]; },
+  root(screen) {
+    const old = this.stack;
+    this.stack = [screen];
+    screen.el.classList.add('screen', 'active', 'entering');
+    stackEl.appendChild(screen.el);
+    screen.el.getBoundingClientRect();
+    screen.el.classList.remove('entering');
+    old.forEach((s) => {
+      s.el.classList.add('leaving');
+      setTimeout(() => { s.el.remove(); s.destroy && s.destroy(); }, 450);
+    });
+    screen.onShow && screen.onShow(true);
+  },
+  push(screen) {
+    const prev = this.top;
+    this.stack.push(screen);
+    screen.el.classList.add('screen');
+    stackEl.appendChild(screen.el);
+    screen.el.getBoundingClientRect();
+    screen.el.classList.add('active');
+    if (prev) { prev.el.classList.remove('active'); prev.el.classList.add('behind'); }
+    screen.onShow && screen.onShow(false);
+  },
+  pop() {
+    if (this.stack.length < 2) return;
+    const cur = this.stack.pop();
+    const prev = this.top;
+    cur.el.classList.remove('active');
+    prev.el.classList.remove('behind');
+    prev.el.classList.add('active');
+    prev.onReturn && prev.onReturn();
+    setTimeout(() => { cur.el.remove(); cur.destroy && cur.destroy(); }, 520);
+  },
+};
+stackEl.addEventListener('click', (e) => { if (e.target.closest('[data-back]')) nav.pop(); });
+
+let swipe = null;
+stackEl.addEventListener('pointerdown', (e) => {
+  if (nav.stack.length < 2 || sheet.isOpen || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  const rect = app.getBoundingClientRect();
+  if (e.clientX - rect.left > 26) return;
+  swipe = { id: e.pointerId, x0: e.clientX, y0: e.clientY, w: rect.width, cur: nav.top, prev: nav.stack[nav.stack.length - 2],
+    started: false, lastX: e.clientX, lastT: performance.now(), v: 0 };
+});
+window.addEventListener('pointermove', (e) => {
+  if (!swipe || e.pointerId !== swipe.id) return;
+  const dx = e.clientX - swipe.x0, dy = e.clientY - swipe.y0;
+  if (!swipe.started) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    if (Math.abs(dy) > Math.abs(dx) || dx < 0) { swipe = null; return; }
+    swipe.started = true;
+    swipe.cur.el.classList.add('dragging');
+    swipe.prev.el.classList.add('dragging');
+  }
+  const x = Math.max(0, dx), p = Math.min(1, x / swipe.w);
+  swipe.cur.el.style.transform = `translate3d(${x}px,0,0)`;
+  swipe.prev.el.style.transform = `translate3d(${-30 * (1 - p)}%,0,0)`;
+  swipe.prev.el.style.setProperty('--dim', (0.45 * (1 - p)).toFixed(3));
+  const t = performance.now();
+  swipe.v = (e.clientX - swipe.lastX) / Math.max(1, t - swipe.lastT);
+  swipe.lastX = e.clientX; swipe.lastT = t;
+});
+function endSwipe(e) {
+  if (!swipe || e.pointerId !== swipe.id) return;
+  const s = swipe; swipe = null;
+  if (!s.started) return;
+  const x = Math.max(0, e.clientX - s.x0);
+  [s.cur.el, s.prev.el].forEach((el) => { el.classList.remove('dragging'); el.style.transform = ''; el.style.removeProperty('--dim'); });
+  if (e.type !== 'pointercancel' && (x > s.w * 0.35 || s.v > 0.45)) nav.pop();
+}
+window.addEventListener('pointerup', endSwipe);
+window.addEventListener('pointercancel', endSwipe);
+
+function navBar({ left = '', title = '', right = '' } = {}) {
+  return `<header class="nav"><div class="nav-left">${left}</div><div class="nav-title" data-nav-title>${esc(title)}</div><div class="nav-right">${right}</div></header>`;
+}
+const backBtn = (label) => `<button class="nav-btn" type="button" data-back aria-label="Volver">${ICON.back}<span>${esc(label)}</span></button>`;
+function wireScroll(el) {
+  const n = el.querySelector('.nav'), sc = el.querySelector('.scroll');
+  if (n && sc) sc.addEventListener('scroll', () => n.classList.toggle('scrolled', sc.scrollTop > 30), { passive: true });
+}
+
+/* ==========================================================================
+   HOJA INFERIOR (arrastrable)
+   ========================================================================== */
+const sheetLayer = $('#sheet');
+const sheetPanel = sheetLayer.querySelector('.sheet');
+const sheetBackdrop = sheetLayer.querySelector('.backdrop');
+const sheetTitle = $('#sheet-title');
+const sheetBody = $('#sheet-body');
+const sheet = {
+  isOpen: false,
+  open({ title, content }) {
+    sheetTitle.textContent = title;
+    if (this.isOpen) {
+      sheetBody.replaceChildren(content);
+      anim(content, [{ opacity: 0 }, { opacity: 1 }], { duration: 250 });
+    } else {
+      sheetBody.replaceChildren(content);
+      sheetBody.scrollTop = 0;
+      this.isOpen = true;
+      app.classList.add('sheet-open');
+      sheetLayer.classList.add('open');
+    }
+    if (FINE) { const f = content.querySelector('input'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 420); }
+  },
+  setTitle(t) { sheetTitle.textContent = t; },
+  close() {
+    if (!this.isOpen) return;
+    this.isOpen = false;
+    if (document.activeElement && sheetLayer.contains(document.activeElement)) document.activeElement.blur();
+    sheetPanel.classList.remove('dragging');
+    sheetPanel.style.transform = '';
+    sheetBackdrop.style.opacity = '';
+    sheetBackdrop.style.transition = '';
+    app.classList.remove('sheet-open');
+    sheetLayer.classList.remove('open');
+    setTimeout(() => { if (!this.isOpen) sheetBody.replaceChildren(); }, 520);
+  },
+};
+sheetLayer.addEventListener('click', (e) => { if (e.target.closest('[data-sheet-close]')) sheet.close(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && sheet.isOpen) sheet.close(); });
+
+let sdrag = null;
+sheetLayer.querySelector('.sheet-grab').addEventListener('pointerdown', (e) => {
+  if (e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  sdrag = { id: e.pointerId, y0: e.clientY, h: sheetPanel.offsetHeight, lastY: e.clientY, lastT: performance.now(), v: 0, dy: 0 };
+  sheetPanel.classList.add('dragging');
+  sheetBackdrop.style.transition = 'none';
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+});
+window.addEventListener('pointermove', (e) => {
+  if (!sdrag || e.pointerId !== sdrag.id) return;
+  let dy = e.clientY - sdrag.y0;
+  if (dy < 0) dy = -Math.pow(-dy, 0.7);
+  sdrag.dy = dy;
+  sheetPanel.style.transform = `translate3d(0,${dy}px,0)`;
+  sheetBackdrop.style.opacity = String(Math.max(0, 1 - Math.max(0, dy) / sdrag.h));
+  const t = performance.now();
+  sdrag.v = (e.clientY - sdrag.lastY) / Math.max(1, t - sdrag.lastT);
+  sdrag.lastY = e.clientY; sdrag.lastT = t;
+});
+function endSheetDrag(e) {
+  if (!sdrag || e.pointerId !== sdrag.id) return;
+  const d = sdrag; sdrag = null;
+  if (d.dy > Math.min(140, d.h * 0.3) || d.v > 0.5) { sheet.close(); return; }
+  sheetPanel.classList.remove('dragging');
+  sheetBackdrop.style.transition = '';
+  sheetPanel.style.transform = '';
+  sheetBackdrop.style.opacity = '';
+}
+window.addEventListener('pointerup', endSheetDrag);
+window.addEventListener('pointercancel', endSheetDrag);
+
+if (window.visualViewport) {
+  const vv = window.visualViewport;
+  const upd = () => app.style.setProperty('--kb', Math.max(0, window.innerHeight - vv.height - vv.offsetTop) + 'px');
+  vv.addEventListener('resize', upd);
+  vv.addEventListener('scroll', upd);
+}
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-reveal]');
+  if (!b) return;
+  const input = b.parentElement.querySelector('input');
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  b.textContent = show ? 'Ocultar' : 'Mostrar';
+});
+const passField = (id, label, auto, ph) => `<div class="field"><label for="${id}">${label}</label><div class="input-wrap"><input class="input has-reveal" id="${id}" type="password" autocomplete="${auto}" placeholder="${ph}"><button type="button" class="reveal" data-reveal>Mostrar</button></div></div>`;
+const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+const isUsername = (v) => /^[a-z0-9_-]{3,24}$/.test(norm(v));
+const cleanUser = (input) => input.addEventListener('input', () => {
+  const v = input.value.toLowerCase().replace(/\s/g, '');
+  if (v !== input.value) input.value = v;
+});
+const userInput = (id, ph) => `<input class="input" id="${id}" maxlength="24" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${ph}">`;
+
+/* ==========================================================================
+   PANTALLA: BIENVENIDA
+   ========================================================================== */
+function WelcomeScreen() {
+  const el = h(`<section class="auth">
+    <div class="scroll">
+      <div class="welcome">
+        ${LOGO}
+        <h1 class="wordmark">Metas</h1>
+        <p class="lede">Define cuánto quieres juntar, registra lo que entra y lo que sale, y reparte tu ahorro en partes.</p>
+      </div>
+      <div class="auth-actions">
+        <button class="btn btn-primary" type="button" data-a="signup">Crear cuenta</button>
+        <button class="btn btn-secondary" type="button" data-a="login">Ya tengo cuenta</button>
+        ${api.kind === 'local' ? '<p class="fine">Por ahora tus datos se guardan solo en este navegador.</p>' : ''}
+      </div>
+    </div>
+  </section>`);
+  el.querySelector('[data-a="signup"]').onclick = () => nav.push(SignupScreen());
+  el.querySelector('[data-a="login"]').onclick = () => nav.push(LoginScreen());
+  return {
+    el,
+    onShow() {
+      const parts = [el.querySelector('.logo'), el.querySelector('.wordmark'), el.querySelector('.lede'), el.querySelector('.auth-actions')];
+      parts.forEach((p, i) => anim(p, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 60 + i * 70 }));
+      anim(el.querySelector('.arc'), [{ strokeDashoffset: 144.5 }, { strokeDashoffset: 43 }], { duration: 1300, delay: 200, easing: 'cubic-bezier(.23,1,.32,1)' });
+    },
+  };
+}
+
+/* ==========================================================================
+   PANTALLA: INICIAR SESIÓN
+   ========================================================================== */
+function LoginScreen() {
+  const el = h(`<section>
+    ${navBar({ left: backBtn('Inicio'), title: 'Iniciar sesión' })}
+    <div class="scroll">
+      <div class="step-head"><h1 class="large">Inicia sesión</h1><p class="muted-p">${BY_USER ? 'Entra con tu usuario y tu contraseña.' : 'Entra con el correo y la contraseña de tu cuenta.'}</p></div>
+      <form class="form" novalidate>
+        ${BY_USER
+          ? `<div class="field"><label for="login-id">Usuario</label>${userInput('login-id', 'Tu usuario')}</div>`
+          : '<div class="field"><label for="login-id">Correo</label><input class="input" id="login-id" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="tu@correo.com"></div>'}
+        ${passField('login-pass', 'Contraseña', 'current-password', 'Tu contraseña')}
+        <div class="err" hidden></div>
+        <button class="btn btn-primary" type="submit">Entrar</button>
+      </form>
+      <p class="switch">¿No tienes cuenta? <button class="link" type="button" data-a="signup">Crear cuenta</button></p>
+    </div>
+  </section>`);
+  wireScroll(el);
+  const form = el.querySelector('form');
+  el.querySelector('[data-a="signup"]').onclick = () => nav.push(SignupScreen());
+  const idInput = form.querySelector('#login-id');
+  if (BY_USER) cleanUser(idInput);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(form);
+    const login = idInput.value;
+    const pass = form.querySelector('#login-pass').value;
+    if (BY_USER && !login.trim()) return showErr(form, 'Escribe tu usuario.');
+    if (!BY_USER && !isEmail(login)) return showErr(form, 'Escribe un correo válido, por ejemplo nombre@correo.com.');
+    if (!pass) return showErr(form, 'Escribe tu contraseña.');
+    const btn = form.querySelector('[type="submit"]');
+    setLoading(btn, true);
+    try {
+      state.session = await api.auth.signIn(login, pass);
+      await loadGoals();
+      nav.root(HomeScreen());
+    } catch (err) {
+      setLoading(btn, false);
+      showErr(form, msgOf(err));
+    }
+  });
+  return { el };
+}
+
+/* ==========================================================================
+   PANTALLA: CREAR CUENTA
+   Elige el flujo según CONFIG.auth.
+   ========================================================================== */
+function SignupScreen() { return BY_USER ? SignupUserScreen() : SignupEmailScreen(); }
+
+/* Modo usuario: usuario + contraseña en un solo paso */
+function SignupUserScreen() {
+  const el = h(`<section>
+    ${navBar({ left: backBtn('Inicio'), title: 'Crear cuenta' })}
+    <div class="scroll">
+      <div class="step-head"><h1 class="large">Crea tu cuenta</h1><p class="muted-p">Elige un usuario y una contraseña. Con ellos entrarás a la app.</p></div>
+      <form class="form" novalidate>
+        <div class="field"><label for="su-user">Usuario</label>${userInput('su-user', 'Ej. alex')}<p class="hint">De 3 a 24 caracteres: letras sin acentos, números, guion o guion bajo.</p></div>
+        ${passField('su-pass', 'Contraseña', 'new-password', 'Mínimo 8 caracteres')}
+        ${passField('su-pass2', 'Confirma la contraseña', 'new-password', 'Escríbela otra vez')}
+        <div class="err" hidden></div>
+        <button class="btn btn-primary" type="submit">Crear cuenta</button>
+      </form>
+    </div>
+  </section>`);
+  wireScroll(el);
+  const form = el.querySelector('form');
+  const user = form.querySelector('#su-user');
+  cleanUser(user);
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(form);
+    const u = norm(user.value);
+    const p1 = form.querySelector('#su-pass').value, p2 = form.querySelector('#su-pass2').value;
+    if (!isUsername(u)) return showErr(form, 'El usuario debe tener de 3 a 24 caracteres: letras sin acentos, números, guion o guion bajo.');
+    if (p1.length < 8) return showErr(form, 'La contraseña necesita al menos 8 caracteres.');
+    if (p1 !== p2) return showErr(form, 'Las contraseñas no coinciden.');
+    const btn = form.querySelector('[type="submit"]');
+    setLoading(btn, true);
+    try {
+      state.session = await api.auth.signUp(u, p1);
+      await loadGoals();
+      nav.root(HomeScreen());
+      setTimeout(() => toast('Cuenta creada'), 250);
+    } catch (err) {
+      setLoading(btn, false);
+      showErr(form, msgOf(err));
+    }
+  });
+  return {
+    el,
+    onShow() { if (FINE) setTimeout(() => user.focus({ preventScroll: true }), 450); },
+  };
+}
+
+/* Modo correo: correo -> código -> contraseña (para Play Store) */
+function SignupEmailScreen() {
+  let email = '', devCode = null, cooldown = 0, timer = null;
+  const el = h(`<section>
+    ${navBar({ left: backBtn('Inicio'), title: 'Crear cuenta' })}
+    <div class="scroll"><div class="steps"></div></div>
+  </section>`);
+  wireScroll(el);
+  const host = el.querySelector('.steps');
+
+  function show(step, dir = 1) {
+    const old = host.firstElementChild;
+    if (old) {
+      old.style.position = 'absolute'; old.style.top = '0'; old.style.left = '0'; old.style.right = '0';
+      const a = anim(old, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-40 * dir}px)` }], { duration: 260, easing: 'ease-in', fill: 'forwards' });
+      if (a) a.onfinish = () => old.remove(); else old.remove();
+    }
+    host.appendChild(step);
+    anim(step, [{ opacity: 0, transform: `translateX(${48 * dir}px)` }, { opacity: 1, transform: 'none' }], { duration: 520, delay: old ? 90 : 0 });
+    el.querySelector('.scroll').scrollTo({ top: 0, behavior: 'smooth' });
+    if (FINE) { const f = step.querySelector('input'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 300); }
+  }
+
+  function stepEmail() {
+    const s = h(`<div>
+      <div class="step-head"><span class="eyebrow">Paso 1 de 3</span><h1 class="large">Crea tu cuenta</h1><p class="muted-p">Te enviaremos un código de 6 dígitos para confirmar tu correo.</p></div>
+      <form class="form" novalidate>
+        <div class="field"><label for="su-email">Correo</label><input class="input" id="su-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="tu@correo.com"></div>
+        <div class="err" hidden></div>
+        <button class="btn btn-primary" type="submit">Enviar código</button>
+      </form>
+    </div>`);
+    const form = s.querySelector('form');
+    const input = s.querySelector('#su-email');
+    input.value = email;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErr(form);
+      if (!isEmail(input.value)) return showErr(form, 'Escribe un correo válido, por ejemplo nombre@correo.com.');
+      const btn = form.querySelector('[type="submit"]');
+      setLoading(btn, true);
+      try {
+        const res = await api.auth.sendSignupCode(input.value);
+        email = norm(input.value);
+        devCode = res.devCode || null;
+        startCooldown();
+        show(stepCode());
+      } catch (err) {
+        setLoading(btn, false);
+        showErr(form, msgOf(err));
+      }
+    });
+    return s;
+  }
+
+  function startCooldown() {
+    cooldown = 30;
+    clearInterval(timer);
+    timer = setInterval(() => {
+      cooldown -= 1;
+      const r = el.querySelector('[data-resend]');
+      if (r) { r.disabled = cooldown > 0; r.textContent = cooldown > 0 ? `Reenviar en ${cooldown} s` : 'Reenviar código'; }
+      if (cooldown <= 0) clearInterval(timer);
+    }, 1000);
+  }
+
+  function stepCode() {
+    const s = h(`<div>
+      <div class="step-head"><span class="eyebrow">Paso 2 de 3</span><h1 class="large">Revisa tu correo</h1><p class="muted-p">Escribe el código que enviamos a <span style="color:var(--text)">${esc(email)}</span>.</p></div>
+      <form class="form" novalidate>
+        <div class="code">
+          <input id="su-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-label="Código de 6 dígitos">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="notice" data-notice hidden>
+          <span>Modo local: aún no se envían correos. Cuando conectes Supabase el código llegará a tu bandeja.</span>
+          <div class="notice-row"><b class="num" data-dev></b><button class="btn btn-secondary btn-sm" type="button" data-fill style="width:auto">Usar código</button></div>
+        </div>
+        <div class="err" hidden></div>
+        <button class="btn btn-primary" type="submit">Verificar</button>
+        <div class="text-actions">
+          <button class="link" type="button" data-change>Cambiar correo</button>
+          <button class="link num" type="button" data-resend disabled>Reenviar en ${cooldown} s</button>
+        </div>
+      </form>
+    </div>`);
+    const form = s.querySelector('form');
+    const input = s.querySelector('#su-code');
+    const cells = [...s.querySelectorAll('.cell')];
+    const notice = s.querySelector('[data-notice]');
+    const paintDev = () => { notice.hidden = !devCode; if (devCode) s.querySelector('[data-dev]').textContent = devCode; };
+    paintDev();
+    function paint() {
+      const v = input.value, focused = document.activeElement === input;
+      cells.forEach((c, i) => {
+        const was = c.textContent;
+        c.textContent = v[i] || '';
+        c.classList.toggle('filled', !!v[i]);
+        c.classList.toggle('active', focused && i === Math.min(v.length, 5));
+        if (v[i] && !was) anim(c, [{ transform: 'scale(.9)' }, { transform: 'none' }], { duration: 260 });
+      });
+    }
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '').slice(0, 6);
+      paint();
+      if (input.value.length === 6) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+    });
+    input.addEventListener('focus', paint);
+    input.addEventListener('blur', paint);
+    s.querySelector('[data-fill]').onclick = () => { input.value = devCode || ''; input.dispatchEvent(new Event('input')); };
+    s.querySelector('[data-change]').onclick = () => show(stepEmail(), -1);
+    const resend = s.querySelector('[data-resend]');
+    resend.onclick = async () => {
+      if (cooldown > 0) return;
+      resend.disabled = true;
+      try {
+        const res = await api.auth.sendSignupCode(email);
+        devCode = res.devCode || null;
+        paintDev();
+        input.value = ''; paint();
+        startCooldown();
+        toast('Te enviamos un código nuevo');
+      } catch (err) { resend.disabled = false; showErr(form, msgOf(err)); }
+    };
+    let busy = false;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (busy) return;
+      clearErr(form);
+      if (input.value.length !== 6) return showErr(form, 'El código tiene 6 dígitos.');
+      const btn = form.querySelector('[type="submit"]');
+      busy = true; setLoading(btn, true);
+      try {
+        await api.auth.verifyCode(email, input.value);
+        show(stepPassword());
+      } catch (err) {
+        busy = false; setLoading(btn, false);
+        showErr(form, msgOf(err));
+        shake(s.querySelector('.code'));
+        input.value = ''; paint();
+      }
+    });
+    return s;
+  }
+
+  function stepPassword() {
+    const s = h(`<div>
+      <div class="step-head"><span class="eyebrow">Paso 3 de 3</span><h1 class="large">Crea una contraseña</h1><p class="muted-p">La usarás con tu correo para entrar. Mínimo 8 caracteres.</p></div>
+      <form class="form" novalidate>
+        <input type="email" autocomplete="username" value="${esc(email)}" hidden>
+        ${passField('su-pass', 'Contraseña', 'new-password', 'Mínimo 8 caracteres')}
+        ${passField('su-pass2', 'Confirma la contraseña', 'new-password', 'Escríbela otra vez')}
+        <div class="err" hidden></div>
+        <button class="btn btn-primary" type="submit">Crear cuenta</button>
+      </form>
+    </div>`);
+    const form = s.querySelector('form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearErr(form);
+      const p1 = s.querySelector('#su-pass').value, p2 = s.querySelector('#su-pass2').value;
+      if (p1.length < 8) return showErr(form, 'La contraseña necesita al menos 8 caracteres.');
+      if (p1 !== p2) return showErr(form, 'Las contraseñas no coinciden.');
+      const btn = form.querySelector('[type="submit"]');
+      setLoading(btn, true);
+      try {
+        state.session = await api.auth.setPassword(email, p1);
+        await loadGoals();
+        nav.root(HomeScreen());
+        setTimeout(() => toast('Cuenta creada'), 250);
+      } catch (err) {
+        setLoading(btn, false);
+        showErr(form, msgOf(err));
+      }
+    });
+    return s;
+  }
+
+  return {
+    el,
+    onShow() { show(stepEmail()); },
+    destroy() { clearInterval(timer); },
+  };
+}
+
+/* ==========================================================================
+   PANTALLA: INICIO (lista de metas)
+   ========================================================================== */
+function HomeScreen() {
+  const initial = (state.session && state.session.name ? state.session.name[0] : '?').toUpperCase();
+  const el = h(`<section>
+    ${navBar({ title: 'Metas', right: `<button class="avatar" type="button" data-a="account" aria-label="Cuenta">${esc(initial)}</button>` })}
+    <div class="scroll">
+      <h1 class="large">Metas</h1>
+      <div class="summary" data-summary hidden>
+        <span class="eyebrow">Total ahorrado</span>
+        <div class="summary-amount num" data-total>$0</div>
+        <div class="summary-sub num" data-total-sub></div>
+      </div>
+      <button class="btn btn-primary create-btn" type="button" data-a="create">${ICON.plus}<span>Crear meta</span></button>
+      <div class="section">
+        <div class="section-head"><span class="eyebrow">Tus metas</span><span class="count" data-count></span></div>
+        <div class="list" data-list></div>
+      </div>
+    </div>
+  </section>`);
+  wireScroll(el);
+  const q = (s) => el.querySelector(s);
+  const prevW = new Map();
+  let first = true;
+
+  function card(g) {
+    const done = g.target > 0 && g.saved >= g.target;
+    return `<button class="goal" type="button" data-id="${esc(g.id)}">
+      <div class="goal-top"><span class="goal-name">${esc(g.name)}</span>${done ? '<span class="pill">Cumplida</span>' : ''}<span class="chev">${ICON.chev}</span></div>
+      <div class="goal-figs"><div><span class="goal-saved num">${money(g.saved)}</span><span class="goal-of num">de ${money(g.target)}</span></div><span class="goal-pct">${pctLabel(g)}</span></div>
+      <div class="bar"><i style="width:${prevW.get(g.id) || 0}%"></i></div>
+    </button>`;
+  }
+
+  function render(newId) {
+    const goals = state.goals;
+    const total = goals.reduce((s, g) => s + g.saved, 0);
+    const targets = goals.reduce((s, g) => s + g.target, 0);
+    q('[data-summary]').hidden = !goals.length;
+    countTo(q('[data-total]'), r2(total));
+    q('[data-total-sub]').textContent = `de ${money(targets)} en ${goals.length} ${goals.length === 1 ? 'meta' : 'metas'}`;
+    q('[data-count]').textContent = goals.length ? String(goals.length) : '';
+    const list = q('[data-list]');
+    if (!goals.length) {
+      list.innerHTML = '<div class="empty"><div><strong>Todavía no tienes metas</strong>Crea la primera con el monto que quieres juntar. Después podrás agregar dinero, registrar gastos y dividir lo ahorrado.</div></div>';
+      if (first) anim(list.firstElementChild, [{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 600, delay: 120 });
+      first = false;
+      return;
+    }
+    list.innerHTML = goals.map(card).join('');
+    void list.offsetWidth;
+    list.querySelectorAll('.goal').forEach((c, i) => {
+      const g = goals[i], w = progress(g);
+      c.querySelector('.bar i').style.width = w + '%';
+      prevW.set(g.id, w);
+      if (first) anim(c, [{ opacity: 0, transform: 'translateY(12px)' }, { opacity: 1, transform: 'none' }], { duration: 620, delay: 80 + i * 45 });
+      else if (g.id === newId) anim(c, [{ opacity: 0, transform: 'translateY(-10px) scale(.97)' }, { opacity: 1, transform: 'none' }], { duration: 560 });
+    });
+    first = false;
+  }
+
+  el.addEventListener('click', (e) => {
+    const g = e.target.closest('.goal');
+    if (g) return nav.push(GoalScreen(g.dataset.id));
+    const a = e.target.closest('[data-a]');
+    if (!a) return;
+    if (a.dataset.a === 'create') openCreateGoal((id) => render(id));
+    if (a.dataset.a === 'account') openAccount();
+  });
+
+  return { el, onShow() { render(); }, onReturn() { render(); }, render };
+}
+
+function openCreateGoal(onDone) {
+  const f = h(`<form class="form" novalidate>
+    <div class="field"><label for="g-name">Nombre</label><input class="input" id="g-name" maxlength="60" autocomplete="off" placeholder="Ej. Reparación del coche"></div>
+    <div class="field"><label for="g-target">Monto de la meta</label>${moneyField('g-target')}</div>
+    <div class="err" hidden></div>
+    <button class="btn btn-primary" type="submit">Crear meta</button>
+  </form>`);
+  bindMoney(f.querySelector('#g-target'));
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(f);
+    const name = f.querySelector('#g-name').value.trim();
+    const target = readMoney(f.querySelector('#g-target'));
+    if (!name) return showErr(f, 'Ponle un nombre a la meta.');
+    if (target <= 0) return showErr(f, 'Escribe el monto que quieres juntar.');
+    const btn = f.querySelector('[type="submit"]');
+    setLoading(btn, true);
+    try {
+      const g = await api.goals.create({ name, target });
+      await loadGoals();
+      sheet.close();
+      setTimeout(() => { onDone(g.id); toast('Meta creada'); }, 180);
+    } catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
+  });
+  sheet.open({ title: 'Nueva meta', content: f });
+}
+
+function openAccount() {
+  const c = h(`<div class="form">
+    <div class="group">
+      <div class="row"><span class="row-k">${BY_USER ? 'Usuario' : 'Correo'}</span><span class="row-v">${esc(state.session.name)}</span></div>
+      <div class="row"><span class="row-k">Datos</span><span class="row-v">${api.kind === 'local' ? 'Guardados en este navegador' : 'Sincronizados con tu cuenta'}</span></div>
+    </div>
+    <button class="btn btn-ghost" type="button" data-out>Cerrar sesión</button>
+  </div>`);
+  c.querySelector('[data-out]').onclick = async () => {
+    await api.auth.signOut();
+    state.session = null; state.goals = [];
+    sheet.close();
+    nav.root(WelcomeScreen());
+  };
+  sheet.open({ title: 'Cuenta', content: c });
+}
+
+/* ==========================================================================
+   PANTALLA: DETALLE DE META
+   ========================================================================== */
+function GoalScreen(id) {
+  let goal = state.goals.find((g) => g.id === id);
+  let movements = null, allocations = null;
+  const el = h(`<section>
+    ${navBar({ left: backBtn('Metas'), title: goal.name, right: '<button class="nav-btn" type="button" data-a="edit">Editar</button>' })}
+    <div class="scroll">
+      <div class="title-row"><h1 class="large" data-name></h1><span class="pill" data-done hidden>Cumplida</span></div>
+      <div class="hero">
+        <span class="eyebrow">Ahorrado</span>
+        <div class="hero-amount num" data-saved>$0</div>
+        <div class="hero-of num" data-of></div>
+        <div class="bar bar-lg"><i data-bar></i></div>
+        <div class="hero-meta num"><span data-pct></span><span data-left></span></div>
+      </div>
+      <div class="actions-2">
+        <button class="btn btn-primary" type="button" data-a="income">${ICON.plus}<span>Agregar dinero</span></button>
+        <button class="btn btn-secondary" type="button" data-a="expense">${ICON.minus}<span>Registrar gasto</span></button>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="eyebrow">División del ahorro</span><button class="link" type="button" data-a="split" data-edit-split hidden>Editar</button></div>
+        <div data-alloc><div class="skeleton"></div></div>
+      </div>
+      <div class="section">
+        <div class="section-head"><span class="eyebrow">Movimientos</span><span class="count" data-mcount></span></div>
+        <div data-moves><div class="skeleton"></div></div>
+      </div>
+    </div>
+  </section>`);
+  wireScroll(el);
+  const q = (s) => el.querySelector(s);
+
+  function renderHero() {
+    q('[data-name]').textContent = goal.name;
+    q('[data-nav-title]').textContent = goal.name;
+    const done = goal.target > 0 && goal.saved >= goal.target;
+    q('[data-done]').hidden = !done;
+    countTo(q('[data-saved]'), goal.saved);
+    q('[data-of]').textContent = 'de ' + money(goal.target);
+    q('[data-bar]').style.width = progress(goal) + '%';
+    q('[data-pct]').textContent = pctLabel(goal) + ' completado';
+    const left = r2(goal.target - goal.saved);
+    q('[data-left]').textContent = left > 0 ? 'Faltan ' + money(left) : left < 0 ? 'Superada por ' + money(-left) : 'Meta exacta';
+  }
+
+  function renderAlloc(fresh) {
+    const host = q('[data-alloc]');
+    if (!allocations) return;
+    q('[data-edit-split]').hidden = !allocations.length;
+    if (!allocations.length) {
+      host.innerHTML = `<div class="empty"><div><strong>Divide tu ahorro</strong>Asigna un porcentaje a cada destino. Por ejemplo, 10% al banco, 70% a la reparación del coche y 20% a pagar un préstamo.</div><button class="btn btn-secondary btn-sm" type="button" data-a="split">Dividir meta</button></div>`;
+      return;
+    }
+    const saved = Math.max(0, goal.saved);
+    const total = allocations.reduce((s, a) => s + a.percent, 0);
+    const rest = r2(100 - total);
+    host.innerHTML = `<div class="split">${allocations.map((a, i) => `<i style="flex-basis:${a.percent}%;background:${shade(i)}"></i>`).join('')}</div>
+      <div class="group">
+        ${allocations.map((a, i) => `<div class="row">
+          <span class="sw" style="background:${shade(i)}"></span>
+          <div class="row-main"><div class="row-title">${esc(a.label)}</div><div class="row-sub num">${fmtPct(a.percent)} · ${money(goal.target * a.percent / 100)} al completar</div></div>
+          <div class="row-right"><div class="row-val num">${money(saved * a.percent / 100)}</div></div>
+        </div>`).join('')}
+        ${rest > 0 ? `<div class="row rest"><span class="sw sw-empty"></span><div class="row-main"><div class="row-title">Sin asignar</div><div class="row-sub num">${fmtPct(rest)} · ${money(goal.target * rest / 100)} al completar</div></div><div class="row-right"><div class="row-val num">${money(saved * rest / 100)}</div></div></div>` : ''}
+      </div>`;
+    if (fresh) anim(host.querySelector('.split'), [{ transform: 'scaleX(0)' }, { transform: 'none' }], { duration: 800, delay: 150 });
+  }
+
+  function renderMoves(newId) {
+    const host = q('[data-moves]');
+    if (!movements) return;
+    q('[data-mcount]').textContent = movements.length ? String(movements.length) : '';
+    if (!movements.length) {
+      host.innerHTML = '<div class="empty"><div><strong>Sin movimientos</strong>Agrega dinero cuando ahorres y registra los gastos que salgan de esta meta.</div></div>';
+      return;
+    }
+    host.innerHTML = `<div class="group">${movements.map((m) => {
+      const inc = m.type === 'income';
+      return `<button class="row" type="button" data-mid="${esc(m.id)}">
+        <div class="row-main"><div class="row-title">${esc(m.concept || (inc ? 'Ingreso' : 'Gasto'))}</div><div class="row-sub">${inc ? 'Ingreso' : 'Gasto'} · ${when(m.created_at)}</div></div>
+        <div class="row-val num ${inc ? '' : 'neg'}">${inc ? '+' : '−'}${money(m.amount)}</div>
+      </button>`;
+    }).join('')}</div>`;
+    if (newId) {
+      const r = host.querySelector(`[data-mid="${CSS.escape(newId)}"]`);
+      if (r) anim(r, [{ opacity: 0, transform: 'translateY(-8px)', background: 'var(--surface-3)' }, { opacity: 1, transform: 'none', background: 'transparent' }], { duration: 700 });
+    }
+  }
+
+  async function reload(newMoveId) {
+    await loadGoals();
+    goal = state.goals.find((g) => g.id === id);
+    if (!goal) { nav.pop(); return; }
+    [movements, allocations] = await Promise.all([api.movements.list(id), api.allocations.list(id)]);
+    renderHero(); renderAlloc(false); renderMoves(newMoveId);
+  }
+
+  el.addEventListener('click', (e) => {
+    const m = e.target.closest('[data-mid]');
+    if (m) {
+      const mv = movements.find((x) => x.id === m.dataset.mid);
+      if (mv) openMovementDetail(mv, () => reload());
+      return;
+    }
+    const a = e.target.closest('[data-a]');
+    if (!a) return;
+    const act = a.dataset.a;
+    if (act === 'income' || act === 'expense') openMovement(goal, act, (newId) => reload(newId));
+    if (act === 'split' && allocations) openSplit(goal, allocations, () => reload());
+    if (act === 'edit') openEditGoal(goal, { onSaved: () => reload(), onDeleted: () => { nav.pop(); setTimeout(() => toast('Meta eliminada'), 300); } });
+  });
+
+  return {
+    el,
+    async onShow() {
+      renderHero();
+      try {
+        [movements, allocations] = await Promise.all([api.movements.list(id), api.allocations.list(id)]);
+        renderAlloc(true); renderMoves();
+        [q('[data-alloc]'), q('[data-moves]')].forEach((n, i) => anim(n, [{ opacity: 0 }, { opacity: 1 }], { duration: 400, delay: i * 60 }));
+      } catch (err) { toast(msgOf(err)); }
+    },
+  };
+}
+
+function openMovement(goal, type, onSaved) {
+  let t = type;
+  const f = h(`<form class="form" novalidate>
+    <div class="seg" role="tablist" aria-label="Tipo de movimiento"><span class="seg-thumb"></span><button type="button" role="tab" data-t="income">Ingreso</button><button type="button" role="tab" data-t="expense">Gasto</button></div>
+    <div class="field"><label for="m-amount">Monto</label>${moneyField('m-amount')}</div>
+    <div class="field"><label for="m-concept">Concepto</label><input class="input" id="m-concept" maxlength="80" autocomplete="off"></div>
+    <p class="hint" data-hint hidden></p>
+    <div class="err" hidden></div>
+    <button class="btn btn-primary" type="submit" data-submit></button>
+  </form>`);
+  const seg = f.querySelector('.seg');
+  const amount = f.querySelector('#m-amount');
+  const concept = f.querySelector('#m-concept');
+  const hint = f.querySelector('[data-hint]');
+  bindMoney(amount);
+  function sync() {
+    seg.dataset.v = t;
+    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.t === t)));
+    concept.placeholder = t === 'income' ? 'Ej. Quincena, venta, ahorro semanal' : 'Ej. Refacción, mano de obra';
+    f.querySelector('[data-submit]').textContent = t === 'income' ? 'Agregar dinero' : 'Registrar gasto';
+    sheet.setTitle(t === 'income' ? 'Agregar dinero' : 'Registrar gasto');
+    checkHint();
+  }
+  function checkHint() {
+    const v = readMoney(amount);
+    const show = t === 'expense' && v > 0 && v > goal.saved;
+    hint.hidden = !show;
+    if (show) hint.textContent = `Este gasto es mayor a lo ahorrado (${money(goal.saved)}). La meta quedará en negativo.`;
+  }
+  seg.addEventListener('click', (e) => { const b = e.target.closest('[data-t]'); if (b && b.dataset.t !== t) { t = b.dataset.t; sync(); } });
+  amount.addEventListener('input', checkHint);
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(f);
+    const v = readMoney(amount);
+    if (v <= 0) return showErr(f, 'Escribe un monto mayor a cero.');
+    const btn = f.querySelector('[data-submit]');
+    setLoading(btn, true);
+    try {
+      const m = await api.movements.create(goal.id, { type: t, amount: v, concept: concept.value });
+      sheet.close();
+      onSaved(m.id);
+      toast(t === 'income' ? 'Agregaste ' + money(v) : 'Gasto registrado');
+    } catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
+  });
+  sheet.open({ title: '', content: f });
+  sync();
+}
+
+function openMovementDetail(m, onDeleted) {
+  const inc = m.type === 'income';
+  const c = h(`<div class="form">
+    <div class="detail-amount num">${inc ? '+' : '−'}${money(m.amount)}</div>
+    <div class="group">
+      <div class="row"><span class="row-k">Tipo</span><span class="row-v">${inc ? 'Ingreso' : 'Gasto'}</span></div>
+      <div class="row"><span class="row-k">Concepto</span><span class="row-v">${esc(m.concept || 'Sin concepto')}</span></div>
+      <div class="row"><span class="row-k">Fecha</span><span class="row-v">${esc(dLong.format(new Date(m.created_at)))}</span></div>
+    </div>
+    <div class="err" hidden></div>
+    <button class="btn btn-ghost" type="button" data-del>Eliminar movimiento</button>
+  </div>`);
+  twoTap(c.querySelector('[data-del]'), 'Toca otra vez para eliminar', async (btn) => {
+    setLoading(btn, true);
+    try { await api.movements.remove(m.id); sheet.close(); onDeleted(); toast('Movimiento eliminado'); }
+    catch (err) { setLoading(btn, false); showErr(c, msgOf(err)); }
+  });
+  sheet.open({ title: 'Movimiento', content: c });
+}
+
+function openEditGoal(goal, { onSaved, onDeleted }) {
+  const f = h(`<form class="form" novalidate>
+    <div class="field"><label for="e-name">Nombre</label><input class="input" id="e-name" maxlength="60" autocomplete="off"></div>
+    <div class="field"><label for="e-target">Monto de la meta</label>${moneyField('e-target')}</div>
+    <div class="err" hidden></div>
+    <button class="btn btn-primary" type="submit">Guardar cambios</button>
+    <button class="btn btn-ghost" type="button" data-del>Eliminar meta</button>
+    <p class="hint">Al eliminarla se borran también sus movimientos y su división.</p>
+  </form>`);
+  const name = f.querySelector('#e-name'), target = f.querySelector('#e-target');
+  name.value = goal.name;
+  target.value = plain(goal.target);
+  bindMoney(target);
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(f);
+    const n = name.value.trim(), t = readMoney(target);
+    if (!n) return showErr(f, 'Ponle un nombre a la meta.');
+    if (t <= 0) return showErr(f, 'Escribe el monto que quieres juntar.');
+    const btn = f.querySelector('[type="submit"]');
+    setLoading(btn, true);
+    try { await api.goals.update(goal.id, { name: n, target: t }); sheet.close(); onSaved(); toast('Cambios guardados'); }
+    catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
+  });
+  twoTap(f.querySelector('[data-del]'), 'Toca otra vez para eliminar', async (btn) => {
+    setLoading(btn, true);
+    try { await api.goals.remove(goal.id); await loadGoals(); sheet.close(); onDeleted(); }
+    catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
+  });
+  sheet.open({ title: 'Editar meta', content: f });
+}
+
+function openSplit(goal, current, onSaved) {
+  const saved = Math.max(0, goal.saved), target = goal.target;
+  let key = 0;
+  let rows = (current.length ? current : [{ label: '', percent: '' }])
+    .map((a) => ({ k: key++, label: a.label || '', percent: a.percent === '' || a.percent == null ? '' : String(a.percent) }));
+  const f = h(`<form class="form" novalidate>
+    <p class="sheet-text">Asigna un porcentaje a cada destino. Los montos se calculan sobre lo que llevas (<b class="num">${money(saved)}</b>) y sobre la meta completa (<b class="num">${money(target)}</b>).</p>
+    <div class="split split-lg" data-preview></div>
+    <div class="alloc-list" data-rows></div>
+    <button class="btn btn-secondary btn-sm" type="button" data-add>${ICON.plus}<span>Agregar parte</span></button>
+    <div class="alloc-total num" data-total></div>
+    <div class="err" hidden></div>
+    <button class="btn btn-primary" type="submit" data-save>Guardar división</button>
+  </form>`);
+  const list = f.querySelector('[data-rows]');
+  const preview = f.querySelector('[data-preview]');
+
+  function rowEl(r) {
+    const e = h(`<div class="alloc-item" data-k="${r.k}">
+      <div class="alloc-row">
+        <input class="input" id="al-l-${r.k}" maxlength="40" autocomplete="off" placeholder="Ej. Al banco" aria-label="Destino">
+        <div class="input-wrap"><input class="input has-suffix num" id="al-p-${r.k}" inputmode="decimal" autocomplete="off" placeholder="0" aria-label="Porcentaje"><span class="suffix">%</span></div>
+        <button class="icon-btn icon-btn-lg" type="button" data-rm aria-label="Quitar parte">${ICON.close}</button>
+      </div>
+      <div class="alloc-calc num" data-calc></div>
+    </div>`);
+    const [l, p] = e.querySelectorAll('input');
+    l.value = r.label; p.value = r.percent;
+    l.addEventListener('input', () => { r.label = l.value; update(); });
+    p.addEventListener('input', () => { p.value = cleanPct(p.value); r.percent = p.value; update(); });
+    e.querySelector('[data-rm]').addEventListener('click', () => {
+      rows = rows.filter((x) => x !== r);
+      e.style.overflow = 'hidden';
+      const a = anim(e, [{ height: e.offsetHeight + 'px', opacity: 1 }, { height: '0px', opacity: 0, paddingBottom: '0px' }], { duration: 320, fill: 'forwards' });
+      if (a) a.onfinish = () => e.remove(); else e.remove();
+      update();
+    });
+    return e;
+  }
+
+  function update() {
+    const total = r2(rows.reduce((s, r) => s + (parseFloat(r.percent) || 0), 0));
+    rows.forEach((r, i) => {
+      const e = list.querySelector(`[data-k="${r.k}"]`);
+      if (!e) return;
+      const p = parseFloat(r.percent) || 0;
+      e.querySelector('[data-calc]').innerHTML = p
+        ? `<span class="sw" style="background:${shade(i)}"></span><span>${money(saved * p / 100)} hoy · ${money(target * p / 100)} al completar</span>`
+        : '<span class="sw sw-empty"></span><span>Escribe un porcentaje</span>';
+    });
+    const keys = new Set(rows.map((r) => String(r.k)));
+    [...preview.children].forEach((c) => { if (!keys.has(c.dataset.k)) c.remove(); });
+    rows.forEach((r, i) => {
+      let seg = preview.querySelector(`[data-k="${r.k}"]`);
+      if (!seg) { seg = document.createElement('i'); seg.dataset.k = r.k; preview.appendChild(seg); }
+      seg.style.background = shade(i);
+      void seg.offsetWidth;
+      seg.style.flexBasis = Math.min(100, parseFloat(r.percent) || 0) + '%';
+    });
+    const box = f.querySelector('[data-total]');
+    const over = total > 100;
+    box.classList.toggle('over', over);
+    box.innerHTML = over
+      ? `<span>Te pasas por <strong>${fmtPct(total - 100)}</strong></span><span>Asignado <strong>${fmtPct(total)}</strong></span>`
+      : `<span>Asignado <strong>${fmtPct(total)}</strong></span><span>Sin asignar <strong>${fmtPct(100 - total)}</strong></span>`;
+    f.querySelector('[data-save]').disabled = over;
+  }
+
+  rows.forEach((r) => list.appendChild(rowEl(r)));
+  f.querySelector('[data-add]').addEventListener('click', () => {
+    const r = { k: key++, label: '', percent: '' };
+    rows.push(r);
+    const e = rowEl(r);
+    list.appendChild(e);
+    anim(e, [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], { duration: 380 });
+    update();
+    e.querySelector('input').focus({ preventScroll: false });
+  });
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearErr(f);
+    const items = rows.filter((r) => r.label.trim() || parseFloat(r.percent));
+    if (items.some((r) => !r.label.trim())) return showErr(f, 'Ponle nombre a cada parte.');
+    if (items.some((r) => !(parseFloat(r.percent) > 0))) return showErr(f, 'Cada parte necesita un porcentaje mayor a 0.');
+    if (items.reduce((s, r) => s + parseFloat(r.percent), 0) > 100.0001) return showErr(f, 'La suma no puede pasar de 100%.');
+    const btn = f.querySelector('[data-save]');
+    setLoading(btn, true);
+    try {
+      await api.allocations.replace(goal.id, items.map((r) => ({ label: r.label, percent: parseFloat(r.percent) })));
+      sheet.close();
+      onSaved();
+      toast(items.length ? 'División guardada' : 'División eliminada');
+    } catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
+  });
+  sheet.open({ title: 'Dividir meta', content: f });
+  requestAnimationFrame(update);
+}
+
+/* ==========================================================================
+   ARRANQUE
+   ========================================================================== */
+async function boot() {
+  try {
+    if (CONFIG.backend === 'supabase') {
+      await loadScript(CONFIG.supabaseJs);
+      api = createSupabaseBackend(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
+    } else {
+      api = createLocalBackend();
+    }
+    state.session = await api.auth.getSession();
+    if (state.session) {
+      try { await loadGoals(); nav.root(HomeScreen()); }
+      catch (e) { await api.auth.signOut(); state.session = null; nav.root(WelcomeScreen()); }
+    } else {
+      nav.root(WelcomeScreen());
+    }
+    if (api.kind === 'local' && !api.persistent) setTimeout(() => toast('Este navegador no permite guardar. Tus datos se perderán al cerrar.'), 900);
+  } catch (e) {
+    api = api || createLocalBackend();
+    nav.root(WelcomeScreen());
+    toast(msgOf(e));
+  }
+}
+boot();
+})();
+</script>
+
+</body>
+</html>
