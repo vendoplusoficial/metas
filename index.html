@@ -69,8 +69,6 @@ h1,h2,p{margin:0}
 .nav.scrolled .nav-title{opacity:1;transform:none}
 .nav-btn{display:inline-flex;align-items:center;gap:6px;height:40px;padding:0 8px;border-radius:8px;font-size:17px;color:var(--text);transition:opacity .15s}
 .nav-btn:active{opacity:.45}
-.avatar{width:34px;height:34px;border-radius:9px;background:var(--surface-2);border:1px solid var(--line-2);font:600 14px var(--font);display:grid;place-items:center;margin-right:6px;transition:transform .2s var(--ease-out),background .2s}
-.avatar:active{transform:scale(.92)}
 
 .scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;touch-action:pan-y;padding:calc(env(safe-area-inset-top,0px) + var(--nav-h)) 20px calc(env(safe-area-inset-bottom,0px) + 48px)}
 .large{font:700 34px/1.12 var(--font-display);letter-spacing:-.022em;margin-top:6px;text-wrap:balance;overflow-wrap:anywhere}
@@ -96,7 +94,6 @@ h1,h2,p{margin:0}
   .btn-secondary:hover:not(:disabled),.btn-ghost:hover:not(:disabled){background:var(--surface-3)}
   .goal:hover{background:var(--surface-2)}
   button.row:hover{background:var(--surface-2)}
-  .avatar:hover{background:var(--surface-3)}
 }
 .spin{width:18px;height:18px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -119,41 +116,9 @@ h1,h2,p{margin:0}
 .input-amount+.unit,.unit{font:500 13px var(--font-mono)!important;letter-spacing:.04em}
 .input-wrap .prefix.big{font:600 30px/1 var(--font-display);color:var(--muted);left:14px}
 .input.input-amount.has-prefix{padding-left:36px}
-.reveal{position:absolute;right:6px;top:50%;transform:translateY(-50%);height:38px;padding:0 10px;border-radius:7px;font-size:14px;font-weight:500;color:var(--text-2)}
-.reveal:active{opacity:.5}
-.input.has-reveal{padding-right:90px}
 .hint{font-size:13px;color:var(--muted);line-height:1.45;padding-left:2px}
 .err{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line-2);border-left:3px solid var(--text);border-radius:8px;background:var(--surface-2);font-size:14px;line-height:1.4;color:var(--text)}
 .err svg{flex:none;margin-top:1px}
-
-/* Código de verificación */
-.code{position:relative;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-.code input{position:absolute;inset:0;width:100%;height:100%;opacity:0;font-size:16px;color:transparent;caret-color:transparent;z-index:1;border:0;background:none;cursor:text}
-.cell{height:60px;border-radius:var(--r-ctrl);background:var(--surface-2);border:1px solid var(--line-2);display:grid;place-items:center;font:600 24px var(--font-mono);transition:border-color .2s,background-color .2s,transform .25s var(--ease-out)}
-.cell.filled{background:#202023}
-.cell.active{border-color:#8a8a90;box-shadow:0 0 0 4px rgba(255,255,255,.06)}
-.cell.active:empty::after{content:"";width:2px;height:26px;background:var(--text);animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.notice{display:grid;gap:10px;padding:14px;border:1px dashed var(--line-2);border-radius:var(--r-card);font-size:14px;color:var(--text-2);line-height:1.45}
-.notice b{font:600 18px var(--font-mono);letter-spacing:.18em;color:var(--text)}
-.notice-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.text-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.text-actions .link{font-size:14px}
-.text-actions .link:disabled{color:var(--faint);cursor:default}
-
-/* Bienvenida y acceso */
-.auth .scroll{display:flex;flex-direction:column;padding-top:calc(env(safe-area-inset-top,0px) + 24px)}
-.welcome{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding-block:48px 32px}
-.logo .track{stroke:var(--surface-3)}
-.logo .arc{stroke:var(--text)}
-.wordmark{font:700 46px/1 var(--font-display);letter-spacing:-.045em}
-.lede{color:var(--muted);font-size:17px;line-height:1.45;max-width:30ch}
-.auth-actions{display:grid;gap:10px}
-.fine{color:var(--faint);font-size:13px;text-align:center;margin-top:6px}
-.step-head{margin:6px 0 28px}
-.step-head .eyebrow{display:block;margin-bottom:12px}
-.steps{position:relative}
-.switch{margin-top:28px;text-align:center;color:var(--muted);font-size:15px}
 
 /* Inicio */
 .summary{display:grid;gap:6px;margin-top:22px}
@@ -281,50 +246,19 @@ button.row:active{background:var(--surface-2)}
 'use strict';
 
 /* ==========================================================================
-   CONFIGURACIÓN
-   backend: 'local'    -> todo se guarda en este navegador
-   backend: 'supabase' -> usa tu proyecto de Supabase (llena URL y anon key)
-
-   auth: 'username' -> usuario + contraseña. No se envía ningún correo.
-   auth: 'email'    -> correo + código de 6 dígitos + contraseña
-                       (déjalo para cuando la publiques en Play Store; ver LEEME.md)
-   ========================================================================== */
-const CONFIG = {
-  backend: 'supabase',
-  auth: 'username',
-  supabaseUrl: 'https://yfqztqnnervgjxzrqelj.supabase.co',
-  supabaseAnonKey: 'sb_publishable_2hcgglV8yelyP7GNi9HOjQ_OFsGGOd8',
-  // Supabase solo inicia sesión con correo y revisa que el dominio exista de verdad.
-  // Por eso tu usuario se guarda por dentro con TU correo + una etiqueta:
-  //   usuario "alex"  ->  tucorreo+alex@gmail.com
-  // Con "Confirm email" desactivado Supabase no manda nada; y si algún día lo hiciera, te llega a ti.
-  usernameEmail: '07.alexacosta@gmail.com',
-  supabaseJs: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js',
-};
-const BY_USER = CONFIG.auth !== 'email';
-const BAD_LOGIN = BY_USER ? 'Usuario o contraseña incorrectos.' : 'Correo o contraseña incorrectos.';
-
-/* ==========================================================================
    UTILIDADES
    ========================================================================== */
 class AppError extends Error {}
-const norm = (e) => String(e || '').trim().toLowerCase();
 const r2 = (n) => Math.round(Number(n) * 100) / 100;
 const uuid = () => (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
   : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
-async function sha256(text) {
-  if (!(window.crypto && crypto.subtle)) throw new AppError('Este navegador no permite cifrar la contraseña. Abre la app desde https.');
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
-}
 const sumMovements = (list) => r2(list.reduce((s, m) => s + (m.type === 'income' ? 1 : -1) * Number(m.amount), 0));
 const msgOf = (e) => (e instanceof AppError) ? e.message : 'Algo salió mal. Inténtalo de nuevo.';
 
 /* ==========================================================================
-   DATOS: MODO LOCAL (navegador)
-   Misma forma que las tablas de Supabase: goals, movements, allocations.
+   DATOS (se guardan en este navegador)
    ========================================================================== */
-function createLocalBackend() {
+function createStore() {
   const KEY = 'metas-ahorro.v1';
   let persistent = true;
   let db = null;
@@ -335,100 +269,40 @@ function createLocalBackend() {
     localStorage.removeItem(KEY + '.probe');
   } catch (e) { persistent = false; }
   if (!db || typeof db !== 'object') db = {};
-  db = Object.assign({ users: {}, session: null, pending: null, goals: [], movements: [], allocations: [] }, db);
+  const clean = (list) => (Array.isArray(list) ? list : []).map(({ user_id, ...rest }) => rest);
+  db = { goals: clean(db.goals), movements: clean(db.movements), allocations: clean(db.allocations) };
 
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) { persistent = false; } };
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const now = () => new Date().toISOString();
-  const me = () => { if (!db.session) throw new AppError('Tu sesión terminó. Inicia sesión de nuevo.'); return db.session.userId; };
-  const own = (list, id, uid) => {
-    const x = list.find((r) => r.id === id && r.user_id === uid);
+  const find = (list, id) => {
+    const x = list.find((r) => r.id === id);
     if (!x) throw new AppError('No encontramos ese registro.');
     return x;
   };
+  save();
 
   return {
-    kind: 'local',
     get persistent() { return persistent; },
-    auth: {
-      async getSession() {
-        const s = db.session;
-        return s ? { userId: s.userId, name: s.name || s.email } : null;
-      },
-      // Modo usuario: crea la cuenta y entra de una vez.
-      async signUp(username, password) {
-        await wait(400);
-        const u = norm(username);
-        if (db.users[u]) throw new AppError('Ese usuario ya existe. Elige otro o inicia sesión.');
-        const salt = uuid();
-        const user = { id: uuid(), email: u, salt, hash: await sha256(salt + password), created_at: now() };
-        db.users[u] = user;
-        db.session = { userId: user.id, name: u };
-        save();
-        return { ...db.session };
-      },
-      // Modo correo: código -> verificación -> contraseña.
-      async sendSignupCode(email) {
-        await wait(450);
-        email = norm(email);
-        if (db.users[email]) throw new AppError('Ya existe una cuenta con este correo. Inicia sesión.');
-        const code = String(Math.floor(Math.random() * 1e6)).padStart(6, '0');
-        db.pending = { email, code, expires: Date.now() + 10 * 60 * 1000, verified: false };
-        save();
-        return { devCode: code }; // En Supabase el código llega por correo y esto no existe.
-      },
-      async verifyCode(email, code) {
-        await wait(350);
-        const p = db.pending;
-        if (!p || p.email !== norm(email)) throw new AppError('Pide un código nuevo para este correo.');
-        if (Date.now() > p.expires) throw new AppError('El código expiró. Pide uno nuevo.');
-        if (String(code) !== p.code) throw new AppError('El código no coincide. Revísalo e inténtalo otra vez.');
-        p.verified = true;
-        save();
-      },
-      async setPassword(email, password) {
-        await wait(300);
-        const p = db.pending;
-        if (!p || !p.verified || p.email !== norm(email)) throw new AppError('Confirma tu correo antes de crear la contraseña.');
-        const salt = uuid();
-        const user = { id: uuid(), email: p.email, salt, hash: await sha256(salt + password), created_at: now() };
-        db.users[p.email] = user;
-        db.pending = null;
-        db.session = { userId: user.id, name: user.email };
-        save();
-        return { ...db.session };
-      },
-      async signIn(login, password) {
-        await wait(450);
-        const u = db.users[norm(login)];
-        if (!u || u.hash !== await sha256(u.salt + password)) throw new AppError(BAD_LOGIN);
-        db.session = { userId: u.id, name: u.email };
-        save();
-        return { ...db.session };
-      },
-      async signOut() { db.session = null; save(); },
-    },
     goals: {
       async list() {
-        const uid = me();
-        return db.goals.filter((g) => g.user_id === uid)
+        return db.goals.slice()
           .sort((a, b) => b.created_at.localeCompare(a.created_at))
           .map((g) => ({ id: g.id, name: g.name, target: g.target, created_at: g.created_at,
             saved: sumMovements(db.movements.filter((m) => m.goal_id === g.id)) }));
       },
       async create({ name, target }) {
-        const g = { id: uuid(), user_id: me(), name: name.trim(), target: r2(target), created_at: now() };
+        const g = { id: uuid(), name: name.trim(), target: r2(target), created_at: now() };
         db.goals.push(g); save();
-        return { id: g.id, name: g.name, target: g.target, created_at: g.created_at, saved: 0 };
+        return { ...g, saved: 0 };
       },
       async update(id, patch) {
-        const g = own(db.goals, id, me());
+        const g = find(db.goals, id);
         if (patch.name != null) g.name = patch.name.trim();
         if (patch.target != null) g.target = r2(patch.target);
         save();
       },
       async remove(id) {
-        own(db.goals, id, me());
+        find(db.goals, id);
         db.goals = db.goals.filter((g) => g.id !== id);
         db.movements = db.movements.filter((m) => m.goal_id !== id);
         db.allocations = db.allocations.filter((a) => a.goal_id !== id);
@@ -437,189 +311,38 @@ function createLocalBackend() {
     },
     movements: {
       async list(goalId) {
-        const uid = me();
-        return db.movements.filter((m) => m.goal_id === goalId && m.user_id === uid)
+        return db.movements.filter((m) => m.goal_id === goalId)
           .sort((a, b) => b.created_at.localeCompare(a.created_at)).map((m) => ({ ...m }));
       },
       async create(goalId, { type, amount, concept }) {
-        const uid = me();
-        own(db.goals, goalId, uid);
-        const m = { id: uuid(), goal_id: goalId, user_id: uid, type, amount: r2(amount), concept: (concept || '').trim(), created_at: now() };
+        find(db.goals, goalId);
+        const m = { id: uuid(), goal_id: goalId, type, amount: r2(amount), concept: (concept || '').trim(), created_at: now() };
         db.movements.push(m); save();
         return { ...m };
       },
       async remove(id) {
-        own(db.movements, id, me());
+        find(db.movements, id);
         db.movements = db.movements.filter((m) => m.id !== id);
         save();
       },
     },
     allocations: {
       async list(goalId) {
-        const uid = me();
-        return db.allocations.filter((a) => a.goal_id === goalId && a.user_id === uid)
+        return db.allocations.filter((a) => a.goal_id === goalId)
           .sort((a, b) => a.position - b.position).map((a) => ({ ...a }));
       },
       async replace(goalId, items) {
-        const uid = me();
-        own(db.goals, goalId, uid);
+        find(db.goals, goalId);
         const total = items.reduce((s, i) => s + Number(i.percent), 0);
         if (total > 100.0001) throw new AppError('La suma de porcentajes no puede pasar de 100%.');
         db.allocations = db.allocations.filter((a) => a.goal_id !== goalId);
-        items.forEach((it, i) => db.allocations.push({ id: uuid(), goal_id: goalId, user_id: uid,
+        items.forEach((it, i) => db.allocations.push({ id: uuid(), goal_id: goalId,
           label: it.label.trim(), percent: r2(it.percent), position: i, created_at: now() }));
         save();
         return this.list(goalId);
       },
     },
   };
-}
-
-/* ==========================================================================
-   DATOS: SUPABASE (listo para usar; ver LEEME.md y schema.sql)
-   Modo usuario: signUp({ email: usuario@dominio, password }) -> entra directo
-                 (requiere "Confirm email" desactivado en Supabase)
-   Modo correo:  signInWithOtp -> verifyOtp (código de 6 dígitos) -> updateUser({password})
-   Acceso:       signInWithPassword
-   ========================================================================== */
-function createSupabaseBackend(url, anonKey) {
-  if (!url || !anonKey) throw new AppError('Falta la URL o la anon key de Supabase en CONFIG.');
-  const sb = window.supabase.createClient(url, anonKey);
-  const toEmail = (username) => {
-    const base = norm(CONFIG.usernameEmail);
-    const at = base.indexOf('@');
-    if (at < 1) throw new AppError('Falta tu correo en usernameEmail dentro de CONFIG (ver LEEME.md).');
-    return `${base.slice(0, at)}+${norm(username)}@${base.slice(at + 1)}`;
-  };
-  const loginEmail = (login) => BY_USER ? toEmail(login) : norm(login);
-  const fail = (error) => {
-    const m = String((error && error.message) || '').toLowerCase();
-    if (m.includes('invalid login')) return new AppError(BAD_LOGIN);
-    if (m.includes('already registered') || m.includes('already exists')) return new AppError(BY_USER ? 'Ese usuario ya existe. Elige otro o inicia sesión.' : 'Ya existe una cuenta con este correo. Inicia sesión.');
-    if (m.includes('email not confirmed')) return new AppError('Supabase pide confirmar el correo. Desactiva "Confirm email" en Authentication (ver LEEME.md).');
-    if (m.includes('signup') && (m.includes('disabled') || m.includes('not allowed'))) return new AppError('El registro de cuentas nuevas está desactivado en Supabase.');
-    if (m.includes('email') && m.includes('invalid')) return new AppError(BY_USER ? 'Supabase rechazó el correo interno. Revisa usernameEmail en CONFIG (ver LEEME.md).' : 'Ese correo no es válido.');
-    if (m.includes('expired') || (m.includes('invalid') && m.includes('token'))) return new AppError('El código no es válido o ya expiró. Pide uno nuevo.');
-    if (m.includes('rate limit') || (error && error.status === 429)) return new AppError('Demasiados intentos. Espera un momento y vuelve a intentarlo.');
-    if (m.includes('password') && m.includes('characters')) return new AppError('La contraseña es muy corta.');
-    if (m.includes('failed to fetch') || m.includes('network')) return new AppError('Sin conexión. Revisa tu internet.');
-    return new AppError((error && error.message) || 'Algo salió mal.');
-  };
-  const sess = (user) => {
-    const meta = user.user_metadata || {};
-    const email = String(user.email || '');
-    const local = email.split('@')[0];
-    return { userId: user.id, name: BY_USER ? (meta.username || local.slice(local.lastIndexOf('+') + 1)) : email };
-  };
-
-  return {
-    kind: 'supabase',
-    persistent: true,
-    auth: {
-      async getSession() {
-        const { data } = await sb.auth.getSession();
-        return data.session ? sess(data.session.user) : null;
-      },
-      async signUp(username, password) {
-        const { data, error } = await sb.auth.signUp({
-          email: toEmail(username),
-          password,
-          options: { data: { username: norm(username) } },
-        });
-        if (error) throw fail(error);
-        if (!data.session) throw new AppError('Supabase no inició la sesión: desactiva "Confirm email" en Authentication > Sign In / Providers > Email (ver LEEME.md).');
-        return sess(data.user);
-      },
-      async sendSignupCode(email) {
-        const { error } = await sb.auth.signInWithOtp({ email: norm(email), options: { shouldCreateUser: true } });
-        if (error) throw fail(error);
-        return {};
-      },
-      async verifyCode(email, code) {
-        const { error } = await sb.auth.verifyOtp({ email: norm(email), token: String(code), type: 'email' });
-        if (error) throw fail(error);
-      },
-      async setPassword(_email, password) {
-        const { data, error } = await sb.auth.updateUser({ password });
-        if (error) throw fail(error);
-        return sess(data.user);
-      },
-      async signIn(login, password) {
-        const { data, error } = await sb.auth.signInWithPassword({ email: loginEmail(login), password });
-        if (error) throw fail(error);
-        return sess(data.user);
-      },
-      async signOut() { await sb.auth.signOut(); },
-    },
-    goals: {
-      async list() {
-        const { data, error } = await sb.from('goals')
-          .select('id,name,target,created_at,movements(type,amount)')
-          .order('created_at', { ascending: false });
-        if (error) throw fail(error);
-        return data.map((g) => ({ id: g.id, name: g.name, target: Number(g.target), created_at: g.created_at, saved: sumMovements(g.movements || []) }));
-      },
-      async create({ name, target }) {
-        const { data, error } = await sb.from('goals').insert({ name: name.trim(), target: r2(target) })
-          .select('id,name,target,created_at').single();
-        if (error) throw fail(error);
-        return { ...data, target: Number(data.target), saved: 0 };
-      },
-      async update(id, patch) {
-        const row = {};
-        if (patch.name != null) row.name = patch.name.trim();
-        if (patch.target != null) row.target = r2(patch.target);
-        const { error } = await sb.from('goals').update(row).eq('id', id);
-        if (error) throw fail(error);
-      },
-      async remove(id) {
-        const { error } = await sb.from('goals').delete().eq('id', id);
-        if (error) throw fail(error);
-      },
-    },
-    movements: {
-      async list(goalId) {
-        const { data, error } = await sb.from('movements').select('id,goal_id,type,amount,concept,created_at')
-          .eq('goal_id', goalId).order('created_at', { ascending: false });
-        if (error) throw fail(error);
-        return data.map((m) => ({ ...m, amount: Number(m.amount) }));
-      },
-      async create(goalId, { type, amount, concept }) {
-        const { data, error } = await sb.from('movements')
-          .insert({ goal_id: goalId, type, amount: r2(amount), concept: (concept || '').trim() })
-          .select('id,goal_id,type,amount,concept,created_at').single();
-        if (error) throw fail(error);
-        return { ...data, amount: Number(data.amount) };
-      },
-      async remove(id) {
-        const { error } = await sb.from('movements').delete().eq('id', id);
-        if (error) throw fail(error);
-      },
-    },
-    allocations: {
-      async list(goalId) {
-        const { data, error } = await sb.from('allocations').select('id,goal_id,label,percent,position')
-          .eq('goal_id', goalId).order('position');
-        if (error) throw fail(error);
-        return data.map((a) => ({ ...a, percent: Number(a.percent) }));
-      },
-      async replace(goalId, items) {
-        const payload = items.map((it, i) => ({ label: it.label.trim(), percent: r2(it.percent), position: i }));
-        const { error } = await sb.rpc('replace_allocations', { p_goal_id: goalId, p_items: payload });
-        if (error) throw fail(error);
-        return this.list(goalId);
-      },
-    },
-  };
-}
-
-function loadScript(src) {
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = src; s.onload = resolve;
-    s.onerror = () => reject(new AppError('No se pudo cargar Supabase. Revisa tu conexión.'));
-    document.head.appendChild(s);
-  });
 }
 
 /* ==========================================================================
@@ -686,13 +409,12 @@ const ICON = {
   close: '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="m2 2 8 8M10 2l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
   alert: '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.5v4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.4" r=".9" fill="currentColor"/></svg>',
 };
-const LOGO = '<svg class="logo" width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><circle class="track" cx="28" cy="28" r="23" fill="none" stroke-width="6"/><circle class="arc" cx="28" cy="28" r="23" fill="none" stroke-width="6" stroke-linecap="round" stroke-dasharray="144.5" stroke-dashoffset="43" transform="rotate(-90 28 28)"/></svg>';
 
 const app = $('#app');
 const stackEl = $('#stack');
 const toastEl = $('#toast');
-let api = null;
-const state = { session: null, goals: [] };
+const api = createStore();
+const state = { goals: [] };
 async function loadGoals() { state.goals = await api.goals.list(); }
 
 let toastTimer;
@@ -924,342 +646,12 @@ if (window.visualViewport) {
   vv.addEventListener('scroll', upd);
 }
 
-document.addEventListener('click', (e) => {
-  const b = e.target.closest('[data-reveal]');
-  if (!b) return;
-  const input = b.parentElement.querySelector('input');
-  const show = input.type === 'password';
-  input.type = show ? 'text' : 'password';
-  b.textContent = show ? 'Ocultar' : 'Mostrar';
-});
-const passField = (id, label, auto, ph) => `<div class="field"><label for="${id}">${label}</label><div class="input-wrap"><input class="input has-reveal" id="${id}" type="password" autocomplete="${auto}" placeholder="${ph}"><button type="button" class="reveal" data-reveal>Mostrar</button></div></div>`;
-const isEmail = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
-const isUsername = (v) => /^[a-z0-9_-]{3,24}$/.test(norm(v));
-const cleanUser = (input) => input.addEventListener('input', () => {
-  const v = input.value.toLowerCase().replace(/\s/g, '');
-  if (v !== input.value) input.value = v;
-});
-const userInput = (id, ph) => `<input class="input" id="${id}" maxlength="24" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="${ph}">`;
-
-/* ==========================================================================
-   PANTALLA: BIENVENIDA
-   ========================================================================== */
-function WelcomeScreen() {
-  const el = h(`<section class="auth">
-    <div class="scroll">
-      <div class="welcome">
-        ${LOGO}
-        <h1 class="wordmark">Metas</h1>
-        <p class="lede">Define cuánto quieres juntar, registra lo que entra y lo que sale, y reparte tu ahorro en partes.</p>
-      </div>
-      <div class="auth-actions">
-        <button class="btn btn-primary" type="button" data-a="signup">Crear cuenta</button>
-        <button class="btn btn-secondary" type="button" data-a="login">Ya tengo cuenta</button>
-        ${api.kind === 'local' ? '<p class="fine">Por ahora tus datos se guardan solo en este navegador.</p>' : ''}
-      </div>
-    </div>
-  </section>`);
-  el.querySelector('[data-a="signup"]').onclick = () => nav.push(SignupScreen());
-  el.querySelector('[data-a="login"]').onclick = () => nav.push(LoginScreen());
-  return {
-    el,
-    onShow() {
-      const parts = [el.querySelector('.logo'), el.querySelector('.wordmark'), el.querySelector('.lede'), el.querySelector('.auth-actions')];
-      parts.forEach((p, i) => anim(p, [{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 700, delay: 60 + i * 70 }));
-      anim(el.querySelector('.arc'), [{ strokeDashoffset: 144.5 }, { strokeDashoffset: 43 }], { duration: 1300, delay: 200, easing: 'cubic-bezier(.23,1,.32,1)' });
-    },
-  };
-}
-
-/* ==========================================================================
-   PANTALLA: INICIAR SESIÓN
-   ========================================================================== */
-function LoginScreen() {
-  const el = h(`<section>
-    ${navBar({ left: backBtn('Inicio'), title: 'Iniciar sesión' })}
-    <div class="scroll">
-      <div class="step-head"><h1 class="large">Inicia sesión</h1><p class="muted-p">${BY_USER ? 'Entra con tu usuario y tu contraseña.' : 'Entra con el correo y la contraseña de tu cuenta.'}</p></div>
-      <form class="form" novalidate>
-        ${BY_USER
-          ? `<div class="field"><label for="login-id">Usuario</label>${userInput('login-id', 'Tu usuario')}</div>`
-          : '<div class="field"><label for="login-id">Correo</label><input class="input" id="login-id" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="tu@correo.com"></div>'}
-        ${passField('login-pass', 'Contraseña', 'current-password', 'Tu contraseña')}
-        <div class="err" hidden></div>
-        <button class="btn btn-primary" type="submit">Entrar</button>
-      </form>
-      <p class="switch">¿No tienes cuenta? <button class="link" type="button" data-a="signup">Crear cuenta</button></p>
-    </div>
-  </section>`);
-  wireScroll(el);
-  const form = el.querySelector('form');
-  el.querySelector('[data-a="signup"]').onclick = () => nav.push(SignupScreen());
-  const idInput = form.querySelector('#login-id');
-  if (BY_USER) cleanUser(idInput);
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErr(form);
-    const login = idInput.value;
-    const pass = form.querySelector('#login-pass').value;
-    if (BY_USER && !login.trim()) return showErr(form, 'Escribe tu usuario.');
-    if (!BY_USER && !isEmail(login)) return showErr(form, 'Escribe un correo válido, por ejemplo nombre@correo.com.');
-    if (!pass) return showErr(form, 'Escribe tu contraseña.');
-    const btn = form.querySelector('[type="submit"]');
-    setLoading(btn, true);
-    try {
-      state.session = await api.auth.signIn(login, pass);
-      await loadGoals();
-      nav.root(HomeScreen());
-    } catch (err) {
-      setLoading(btn, false);
-      showErr(form, msgOf(err));
-    }
-  });
-  return { el };
-}
-
-/* ==========================================================================
-   PANTALLA: CREAR CUENTA
-   Elige el flujo según CONFIG.auth.
-   ========================================================================== */
-function SignupScreen() { return BY_USER ? SignupUserScreen() : SignupEmailScreen(); }
-
-/* Modo usuario: usuario + contraseña en un solo paso */
-function SignupUserScreen() {
-  const el = h(`<section>
-    ${navBar({ left: backBtn('Inicio'), title: 'Crear cuenta' })}
-    <div class="scroll">
-      <div class="step-head"><h1 class="large">Crea tu cuenta</h1><p class="muted-p">Elige un usuario y una contraseña. Con ellos entrarás a la app.</p></div>
-      <form class="form" novalidate>
-        <div class="field"><label for="su-user">Usuario</label>${userInput('su-user', 'Ej. alex')}<p class="hint">De 3 a 24 caracteres: letras sin acentos, números, guion o guion bajo.</p></div>
-        ${passField('su-pass', 'Contraseña', 'new-password', 'Mínimo 8 caracteres')}
-        ${passField('su-pass2', 'Confirma la contraseña', 'new-password', 'Escríbela otra vez')}
-        <div class="err" hidden></div>
-        <button class="btn btn-primary" type="submit">Crear cuenta</button>
-      </form>
-    </div>
-  </section>`);
-  wireScroll(el);
-  const form = el.querySelector('form');
-  const user = form.querySelector('#su-user');
-  cleanUser(user);
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    clearErr(form);
-    const u = norm(user.value);
-    const p1 = form.querySelector('#su-pass').value, p2 = form.querySelector('#su-pass2').value;
-    if (!isUsername(u)) return showErr(form, 'El usuario debe tener de 3 a 24 caracteres: letras sin acentos, números, guion o guion bajo.');
-    if (p1.length < 8) return showErr(form, 'La contraseña necesita al menos 8 caracteres.');
-    if (p1 !== p2) return showErr(form, 'Las contraseñas no coinciden.');
-    const btn = form.querySelector('[type="submit"]');
-    setLoading(btn, true);
-    try {
-      state.session = await api.auth.signUp(u, p1);
-      await loadGoals();
-      nav.root(HomeScreen());
-      setTimeout(() => toast('Cuenta creada'), 250);
-    } catch (err) {
-      setLoading(btn, false);
-      showErr(form, msgOf(err));
-    }
-  });
-  return {
-    el,
-    onShow() { if (FINE) setTimeout(() => user.focus({ preventScroll: true }), 450); },
-  };
-}
-
-/* Modo correo: correo -> código -> contraseña (para Play Store) */
-function SignupEmailScreen() {
-  let email = '', devCode = null, cooldown = 0, timer = null;
-  const el = h(`<section>
-    ${navBar({ left: backBtn('Inicio'), title: 'Crear cuenta' })}
-    <div class="scroll"><div class="steps"></div></div>
-  </section>`);
-  wireScroll(el);
-  const host = el.querySelector('.steps');
-
-  function show(step, dir = 1) {
-    const old = host.firstElementChild;
-    if (old) {
-      old.style.position = 'absolute'; old.style.top = '0'; old.style.left = '0'; old.style.right = '0';
-      const a = anim(old, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-40 * dir}px)` }], { duration: 260, easing: 'ease-in', fill: 'forwards' });
-      if (a) a.onfinish = () => old.remove(); else old.remove();
-    }
-    host.appendChild(step);
-    anim(step, [{ opacity: 0, transform: `translateX(${48 * dir}px)` }, { opacity: 1, transform: 'none' }], { duration: 520, delay: old ? 90 : 0 });
-    el.querySelector('.scroll').scrollTo({ top: 0, behavior: 'smooth' });
-    if (FINE) { const f = step.querySelector('input'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 300); }
-  }
-
-  function stepEmail() {
-    const s = h(`<div>
-      <div class="step-head"><span class="eyebrow">Paso 1 de 3</span><h1 class="large">Crea tu cuenta</h1><p class="muted-p">Te enviaremos un código de 6 dígitos para confirmar tu correo.</p></div>
-      <form class="form" novalidate>
-        <div class="field"><label for="su-email">Correo</label><input class="input" id="su-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="tu@correo.com"></div>
-        <div class="err" hidden></div>
-        <button class="btn btn-primary" type="submit">Enviar código</button>
-      </form>
-    </div>`);
-    const form = s.querySelector('form');
-    const input = s.querySelector('#su-email');
-    input.value = email;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearErr(form);
-      if (!isEmail(input.value)) return showErr(form, 'Escribe un correo válido, por ejemplo nombre@correo.com.');
-      const btn = form.querySelector('[type="submit"]');
-      setLoading(btn, true);
-      try {
-        const res = await api.auth.sendSignupCode(input.value);
-        email = norm(input.value);
-        devCode = res.devCode || null;
-        startCooldown();
-        show(stepCode());
-      } catch (err) {
-        setLoading(btn, false);
-        showErr(form, msgOf(err));
-      }
-    });
-    return s;
-  }
-
-  function startCooldown() {
-    cooldown = 30;
-    clearInterval(timer);
-    timer = setInterval(() => {
-      cooldown -= 1;
-      const r = el.querySelector('[data-resend]');
-      if (r) { r.disabled = cooldown > 0; r.textContent = cooldown > 0 ? `Reenviar en ${cooldown} s` : 'Reenviar código'; }
-      if (cooldown <= 0) clearInterval(timer);
-    }, 1000);
-  }
-
-  function stepCode() {
-    const s = h(`<div>
-      <div class="step-head"><span class="eyebrow">Paso 2 de 3</span><h1 class="large">Revisa tu correo</h1><p class="muted-p">Escribe el código que enviamos a <span style="color:var(--text)">${esc(email)}</span>.</p></div>
-      <form class="form" novalidate>
-        <div class="code">
-          <input id="su-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*" aria-label="Código de 6 dígitos">
-          <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
-        </div>
-        <div class="notice" data-notice hidden>
-          <span>Modo local: aún no se envían correos. Cuando conectes Supabase el código llegará a tu bandeja.</span>
-          <div class="notice-row"><b class="num" data-dev></b><button class="btn btn-secondary btn-sm" type="button" data-fill style="width:auto">Usar código</button></div>
-        </div>
-        <div class="err" hidden></div>
-        <button class="btn btn-primary" type="submit">Verificar</button>
-        <div class="text-actions">
-          <button class="link" type="button" data-change>Cambiar correo</button>
-          <button class="link num" type="button" data-resend disabled>Reenviar en ${cooldown} s</button>
-        </div>
-      </form>
-    </div>`);
-    const form = s.querySelector('form');
-    const input = s.querySelector('#su-code');
-    const cells = [...s.querySelectorAll('.cell')];
-    const notice = s.querySelector('[data-notice]');
-    const paintDev = () => { notice.hidden = !devCode; if (devCode) s.querySelector('[data-dev]').textContent = devCode; };
-    paintDev();
-    function paint() {
-      const v = input.value, focused = document.activeElement === input;
-      cells.forEach((c, i) => {
-        const was = c.textContent;
-        c.textContent = v[i] || '';
-        c.classList.toggle('filled', !!v[i]);
-        c.classList.toggle('active', focused && i === Math.min(v.length, 5));
-        if (v[i] && !was) anim(c, [{ transform: 'scale(.9)' }, { transform: 'none' }], { duration: 260 });
-      });
-    }
-    input.addEventListener('input', () => {
-      input.value = input.value.replace(/\D/g, '').slice(0, 6);
-      paint();
-      if (input.value.length === 6) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
-    });
-    input.addEventListener('focus', paint);
-    input.addEventListener('blur', paint);
-    s.querySelector('[data-fill]').onclick = () => { input.value = devCode || ''; input.dispatchEvent(new Event('input')); };
-    s.querySelector('[data-change]').onclick = () => show(stepEmail(), -1);
-    const resend = s.querySelector('[data-resend]');
-    resend.onclick = async () => {
-      if (cooldown > 0) return;
-      resend.disabled = true;
-      try {
-        const res = await api.auth.sendSignupCode(email);
-        devCode = res.devCode || null;
-        paintDev();
-        input.value = ''; paint();
-        startCooldown();
-        toast('Te enviamos un código nuevo');
-      } catch (err) { resend.disabled = false; showErr(form, msgOf(err)); }
-    };
-    let busy = false;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      if (busy) return;
-      clearErr(form);
-      if (input.value.length !== 6) return showErr(form, 'El código tiene 6 dígitos.');
-      const btn = form.querySelector('[type="submit"]');
-      busy = true; setLoading(btn, true);
-      try {
-        await api.auth.verifyCode(email, input.value);
-        show(stepPassword());
-      } catch (err) {
-        busy = false; setLoading(btn, false);
-        showErr(form, msgOf(err));
-        shake(s.querySelector('.code'));
-        input.value = ''; paint();
-      }
-    });
-    return s;
-  }
-
-  function stepPassword() {
-    const s = h(`<div>
-      <div class="step-head"><span class="eyebrow">Paso 3 de 3</span><h1 class="large">Crea una contraseña</h1><p class="muted-p">La usarás con tu correo para entrar. Mínimo 8 caracteres.</p></div>
-      <form class="form" novalidate>
-        <input type="email" autocomplete="username" value="${esc(email)}" hidden>
-        ${passField('su-pass', 'Contraseña', 'new-password', 'Mínimo 8 caracteres')}
-        ${passField('su-pass2', 'Confirma la contraseña', 'new-password', 'Escríbela otra vez')}
-        <div class="err" hidden></div>
-        <button class="btn btn-primary" type="submit">Crear cuenta</button>
-      </form>
-    </div>`);
-    const form = s.querySelector('form');
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      clearErr(form);
-      const p1 = s.querySelector('#su-pass').value, p2 = s.querySelector('#su-pass2').value;
-      if (p1.length < 8) return showErr(form, 'La contraseña necesita al menos 8 caracteres.');
-      if (p1 !== p2) return showErr(form, 'Las contraseñas no coinciden.');
-      const btn = form.querySelector('[type="submit"]');
-      setLoading(btn, true);
-      try {
-        state.session = await api.auth.setPassword(email, p1);
-        await loadGoals();
-        nav.root(HomeScreen());
-        setTimeout(() => toast('Cuenta creada'), 250);
-      } catch (err) {
-        setLoading(btn, false);
-        showErr(form, msgOf(err));
-      }
-    });
-    return s;
-  }
-
-  return {
-    el,
-    onShow() { show(stepEmail()); },
-    destroy() { clearInterval(timer); },
-  };
-}
-
 /* ==========================================================================
    PANTALLA: INICIO (lista de metas)
    ========================================================================== */
 function HomeScreen() {
-  const initial = (state.session && state.session.name ? state.session.name[0] : '?').toUpperCase();
   const el = h(`<section>
-    ${navBar({ title: 'Metas', right: `<button class="avatar" type="button" data-a="account" aria-label="Cuenta">${esc(initial)}</button>` })}
+    ${navBar({ title: 'Metas' })}
     <div class="scroll">
       <h1 class="large">Metas</h1>
       <div class="summary" data-summary hidden>
@@ -1321,7 +713,6 @@ function HomeScreen() {
     const a = e.target.closest('[data-a]');
     if (!a) return;
     if (a.dataset.a === 'create') openCreateGoal((id) => render(id));
-    if (a.dataset.a === 'account') openAccount();
   });
 
   return { el, onShow() { render(); }, onReturn() { render(); }, render };
@@ -1352,23 +743,6 @@ function openCreateGoal(onDone) {
     } catch (err) { setLoading(btn, false); showErr(f, msgOf(err)); }
   });
   sheet.open({ title: 'Nueva meta', content: f });
-}
-
-function openAccount() {
-  const c = h(`<div class="form">
-    <div class="group">
-      <div class="row"><span class="row-k">${BY_USER ? 'Usuario' : 'Correo'}</span><span class="row-v">${esc(state.session.name)}</span></div>
-      <div class="row"><span class="row-k">Datos</span><span class="row-v">${api.kind === 'local' ? 'Guardados en este navegador' : 'Sincronizados con tu cuenta'}</span></div>
-    </div>
-    <button class="btn btn-ghost" type="button" data-out>Cerrar sesión</button>
-  </div>`);
-  c.querySelector('[data-out]').onclick = async () => {
-    await api.auth.signOut();
-    state.session = null; state.goals = [];
-    sheet.close();
-    nav.root(WelcomeScreen());
-  };
-  sheet.open({ title: 'Cuenta', content: c });
 }
 
 /* ==========================================================================
@@ -1701,26 +1075,10 @@ function openSplit(goal, current, onSaved) {
    ARRANQUE
    ========================================================================== */
 async function boot() {
-  try {
-    if (CONFIG.backend === 'supabase') {
-      await loadScript(CONFIG.supabaseJs);
-      api = createSupabaseBackend(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
-    } else {
-      api = createLocalBackend();
-    }
-    state.session = await api.auth.getSession();
-    if (state.session) {
-      try { await loadGoals(); nav.root(HomeScreen()); }
-      catch (e) { await api.auth.signOut(); state.session = null; nav.root(WelcomeScreen()); }
-    } else {
-      nav.root(WelcomeScreen());
-    }
-    if (api.kind === 'local' && !api.persistent) setTimeout(() => toast('Este navegador no permite guardar. Tus datos se perderán al cerrar.'), 900);
-  } catch (e) {
-    api = api || createLocalBackend();
-    nav.root(WelcomeScreen());
-    toast(msgOf(e));
-  }
+  try { await loadGoals(); }
+  catch (e) { state.goals = []; setTimeout(() => toast(msgOf(e)), 900); }
+  nav.root(HomeScreen());
+  if (!api.persistent) setTimeout(() => toast('Este navegador no permite guardar. Tus datos se perderán al cerrar.'), 900);
 }
 boot();
 })();
